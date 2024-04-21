@@ -20,7 +20,11 @@ update vservers set templatename="almalinux-8-x86_64-ez" where hostname="HOSTNAM
 ## WHMCS
 For those using WHMCS, you will want to adjust the OS template configurable option there as well.
 
-# Troubleshooting
+## Logging
+
+Logs from almaconvert8 will be stored in /root/almaconvert8-$CTID.log
+
+# Reverting to snapshot
 In the event of failure, there are two snapshots you can revert to:
 
 1. The first is taken before any changes are made at all, and
@@ -43,3 +47,22 @@ vzctl start $CTID
 
 Once you have confirmed the container is back to the original state, delete the snapshot:
 `vzctl snapshot-delete $CTID --id $SNAP_ID`
+
+# Troubleshooting
+
+In the event Plesk still isn't working right after this script is complete, it's possbile running the official conversion utility's --finish option will help. I suspect doing so just duplicates the efforts of this script, but it's possible it has a couple extra tidbits in it to help. Here's how to do that:
+
+```
+mkdir /usr/local/psa/etc/awstats/
+wget https://github.com/plesk/centos2alma/releases/download/v1.2.4/centos2alma-1.2.4.zip
+unzip centos2alma-1.2.4.zip
+chmod 755 centos2alma
+./centos2alma --finish
+```
+
+Note: if Germany is blocked in firewall, the almalinux GPG key will fail to download.
+
+# References
+
+- almaconvert8: https://docs.virtuozzo.com/virtuozzo_hybrid_server_7_users_guide/advanced-tasks/converting-containers-with-almaconvert8.html
+- Plesk Forum thread: https://talk.plesk.com/threads/upgrade-virtuozzo-container-from-centos-7.369729/
