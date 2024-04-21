@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Version 1.0b
-# Usage: bash centos2alma_openvz.sh [CTID]
+# Usage: ./centos2alma_openvz.sh <CTID>
 
 CTID=$1
 
