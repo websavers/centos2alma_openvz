@@ -10,11 +10,15 @@ SNAP_ID=put_snapshot_id_here
 vzctl snapshot-delete $CTID --id $SNAP_ID
 ```
 
-If you use SolusVM, run these on your master to update the OS name. Be sure to replace HOSTNAME with the actual hostname of the container.
+## SolusVM
+For those using SolusVM, run these on your master to update the OS name. Be sure to replace HOSTNAME with the actual hostname of the container.
 ```
 bash /root/solusvmdb.sh
 update vservers set templatename="almalinux-8-x86_64-ez" where hostname="HOSTNAME";
 ```
+
+## WHMCS
+For those using WHMCS, you will want to adjust the OS template configurable option there as well.
 
 # Troubleshooting
 In the event of failure, there are two snapshots you can revert to:
