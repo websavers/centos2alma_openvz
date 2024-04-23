@@ -4,17 +4,25 @@
 # Usage: ./centos2alma_openvz.sh <CTID>
 
 CTID=$1
+AC_BIN=/root/almaconvert8-plesk
 
 function install_almaconvert { 
-    echo "Installing vzdeploy8 / almaconvert8 packages on local node..."
-    yum install vzdeploy8 -y
-    [ ! $? -eq 0 ] && echo "Unable to install vzdeploy8 / almaconvert8 packages. Exiting..." && exit 1
 
-    if [ ! -f "/root/almaconvert8-plesk" ]; then
-        echo "Creating modified version of almaconvert8 to ignore Plesk blocker checks..."
-        cp /usr/bin/almaconvert8 /root/almaconvert8-plesk
-        sed -i -e "s/BLOCKER_PKGS = {'plesk': 'Plesk', 'cpanel': 'cPanel'}/BLOCKER_PKGS = {'cpanel': 'cPanel'}/g"  /root/almaconvert8-plesk
+    if rpm -q --quiet vzdeploy8 ; then 
+        echo "Already have vzdeploy8. Skipping install..."
+    else
+        echo "Installing vzdeploy8 / almaconvert8 packages on local node..."
+        yum install vzdeploy8 -y
+        [ ! $? -eq 0 ] && echo "Unable to install vzdeploy8 / almaconvert8 packages. Exiting..." && exit 1
     fi
+
+    # TODO: Do we still need to do this if we're removing Plesk packages prior to running almaconvert8 anyway?
+    if [ ! -f "$AC_BIN" ]; then
+        echo "Creating modified version of almaconvert8 to ignore Plesk blocker checks..."
+        cp /usr/bin/almaconvert8 $AC_BIN
+        sed -i -e "s/BLOCKER_PKGS = {'plesk': 'Plesk', 'cpanel': 'cPanel'}/BLOCKER_PKGS = {'cpanel': 'cPanel'}/g"  $AC_BIN
+    fi
+
 }
 
 function ct_prepare {
@@ -95,7 +103,7 @@ vzlist $CTID >/dev/null
 [ ! $? -eq 0 ] && echo "CTID provided does not appear to be valid. Exiting..." && exit 1
 
 
-# idiomatic parameter and option handling in sh
+# idiomatic parameter and option handling
 while test $# -gt 0
 do
     case "$1" in
@@ -115,28 +123,22 @@ do
     shift
 done
 
-read -p "The following process will convert CTID $CTID to AlmaLinux 8. Are you sure you're ready to proceed? (y/n) " -n 1 -r
-echo
-if ! [[ $REPLY =~ ^[Yy]$ ]] ; then
-    exit
-fi
-
 # Install and modify necessary utilities
 install_almaconvert
 
-read -p "Stages 2 and 3 are destructive. Ready to proceed? (y/n) " -n 1 -r
+read -p "The following process will convert CTID $CTID to AlmaLinux 8 (destructive changes). Are you sure you're ready to proceed? (y/n) " -n 1 -r
 echo
 if ! [[ $REPLY =~ ^[Yy]$ ]] ; then
     exit
 fi
 
-echo "STAGE 2: Preparing container for conversion (destructive - removes packages)"
+echo "STAGE 1: Preparing container for conversion..."
 ct_prepare
 
-echo "STAGE 3: Conversion now in progress using almaconvert8. Do not interrupt unless failure reported."
-almaconvert8-plesk convert $CTID --log /root/almaconvert8-$CTID.log
+echo "STAGE 2: Conversion begins using almaconvert8. Do not interrupt unless failure reported."
+$AC_BIN convert $CTID --log /root/almaconvert8-$CTID.log
 
-echo "STAGE 4: Post-Conversion Repairs"
+echo "STAGE 3: Post-Conversion Repairs..."
 ct_finish
 
 echo "Conversion completed!"
