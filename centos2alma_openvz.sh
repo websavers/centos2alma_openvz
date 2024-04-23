@@ -33,7 +33,7 @@ function ct_prepare {
     echo "Creating snapshot prior to any changes..."
     vzctl snapshot $CTID --name $SNAPSHOT_NAME
     
-    echo "Updating all packages to CentOS 7.9"
+    echo "Updating all packages to ensure we're running CentOS 7.9"
     vzctl exec $CTID yum update -y
 
     echo "Creating database backup..."
