@@ -108,6 +108,15 @@ function ct_revert {
 
 }
 
+function ct_check {
+
+    install_almaconvert
+    can_convert=$(almaconvert8 list | grep $CTID)
+    [ "$can_convert" -eq "" ] && echo "$CTID can *not* be converted to almalinux 8." && exit 1
+    echo "$CTID can be converted to almalinux 8."
+
+}
+
 function reinstall_mariadb {
     vzctl exec $CTID curl -LsS -O https://downloads.mariadb.com/MariaDB/mariadb_repo_setup
     vzctl exec $CTID bash mariadb_repo_setup --mariadb-server-version=10.11
@@ -135,6 +144,10 @@ do
             ;;
         --revert) echo "Revert parameter provided. Doing reversion to CentOS7 snapshot..."
             ct_revert
+            exit 0
+            ;;
+        --check) echo "Check parameter provided. Checking if container can be converted..."
+            ct_check
             exit 0
             ;;
         #--*) echo "bad option $1"
