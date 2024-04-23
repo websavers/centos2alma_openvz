@@ -65,11 +65,15 @@ function ct_prepare {
 
     vzctl exec $CTID systemctl stop mariadb
 
+    # Save Plesk version for later use when re-downloading RPMs and restoring the PSA DB
+    vzctl exec cat /etc/plesk-release | sed -n '1p' | awk -F. '{print $1"."$2"."$3}' > /root/plesk_version
+
     echo "Removing packages that conflict with the almaconvert8 conversion process, including Plesk RPMs..."
     vzctl exec $CTID rpm -e btrfs-progs --nodeps
     vzctl exec $CTID rpm -e python3-pip --nodeps
     vzctl exec $CTID yum -y remove "plesk-*"
     vzctl exec $CTID rpm -e openssl11-libs --nodeps
+    vzctl exec $CTID rpm -e psa-mod_proxy --nodeps
     vzctl exec $CTID rpm -e MariaDB-server MariaDB-client MariaDB-shared MariaDB-common MariaDB-compat --nodeps
     vzctl exec $CTID rpm -e python36-PyYAML --nodeps
 
@@ -93,23 +97,27 @@ function ct_finish {
     reinstall_mariadb
 
     # Reload Plesk DB from backup
-    vzctl exec $CTID 'zcat /var/lib/psa/dumps/mysql.plesk.core.prerm.18.0.60.`date "+%Y%m%d"`-*dump.gz | MYSQL_PWD=`cat /etc/psa/.psa.shadow` mysql -uadmin'
+    #vzctl exec $CTID 'zcat /var/lib/psa/dumps/mysql.plesk.core.prerm.`cat /root/plesk_version`.`date "+%Y%m%d"`-*dump.gz | MYSQL_PWD=`cat /etc/psa/.psa.shadow` mysql -uadmin'
     
-    # Restore all databases from backup (don't seem to need this; only psa DB is removed)
-    #echo "Restoring MariaDB databases..."
-    #vzctl exec $CTID 'zcat /root/all_databases_dump.sql.gz | MYSQL_PWD=`cat /etc/psa/.psa.shadow` mysql -uadmin'
+    # Restore all databases from backup (this is done because psa and phpmyadmin dbs are removed)
+    echo "Restoring MariaDB databases..."
+    vzctl exec $CTID 'zcat /root/all_databases_dump.sql.gz | MYSQL_PWD=`cat /etc/psa/.psa.shadow` mysql -uadmin'
 
     echo "Reinstalling base Plesk packages..."
 
-    vzctl exec $CTID "echo '[PSA_18_0_60-base]
-name=PLESK_18_0_60 base
-baseurl=http://autoinstall.plesk.com/pool/PSA_18.0.60_14244/dist-rpm-RedHat-el8-x86_64/
+    vzctl exec $CTID 'PLESK_V=`cat /root/plesk_version` && echo "[PLESK-base]
+name=PLESK base
+baseurl=http://autoinstall.plesk.com/PSA_$PLESK_V/dist-rpm-RedHat-el8-x86_64/
 enabled=1
 gpgcheck=1
-' > /etc/yum.repos.d/plesk-base-tmp.repo"
+" > /etc/yum.repos.d/plesk-base-tmp.repo'
 
     vzctl exec $CTID yum -y install plesk-release plesk-engine plesk-completion psa-autoinstaller psa-libxml-proxy plesk-repair-kit plesk-config-troubleshooter psa-updates psa-phpmyadmin
 
+    echo "Restoring necessary components"
+    vzctl exec $CTID plesk installer install-all-updates
+    vzctl exec $CTID plesk installer add --components modsecurity nginx bind postfix dovecot resctrl php7.4 php8.0 php8.1 php8.2 php8.3
+    
     echo "Running Plesk Repair..."
     vzctl exec $CTID plesk repair installation
 
