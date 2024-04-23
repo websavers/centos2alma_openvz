@@ -7,7 +7,7 @@ CTID=$1
 AC_BIN=/root/almaconvert8-plesk
 SNAPSHOT_NAME=CentOS7PleskBase
 
-# Changes to the node packages
+# Changes to node packages
 function install_almaconvert { 
 
     if rpm -q --quiet vzdeploy8 ; then 
