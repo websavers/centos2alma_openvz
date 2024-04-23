@@ -79,9 +79,9 @@ function ct_prepare {
 # Changes to the container only via vzctl commands
 function ct_finish {
 
-    vzctl exec $CTID yum install python3 -y
+    vzctl exec $CTID yum -y install python3
     vzctl exec $CTID sed -i -e 's/CentOS-7/RedHat-el8/g' /etc/yum.repos.d/plesk*
-    vzctl exec $CTID yum update -y
+    vzctl exec $CTID yum -y update 
 
     reinstall_mariadb
 
@@ -97,7 +97,7 @@ enabled=1
 gpgcheck=1
 ' > /etc/yum.repos.d/plesk-base-tmp.repo"
 
-    vzctl exec $CTID yum install plesk-release plesk-engine plesk-completion psa-autoinstaller psa-libxml-proxy plesk-repair-kit plesk-config-troubleshooter psa-updates psa-phpmyadmin
+    vzctl exec $CTID yum -y install plesk-release plesk-engine plesk-completion psa-autoinstaller psa-libxml-proxy plesk-repair-kit plesk-config-troubleshooter psa-updates psa-phpmyadmin
 
     echo "Running Plesk Repair..."
     vzctl exec $CTID plesk repair installation
