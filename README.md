@@ -30,7 +30,10 @@ In the event of failure, there are two snapshots you can revert to:
 1. The first is taken before any changes are made at all, and
 2. The second is taken by the almaconvert8 utility *after* conflicting packages are removed, but before the actual conversion occurs.
 
-To revert to one of these snapshots, run this to get their IDs:
+To revert to the first/earliest snapshot, simply run:
+`./centos2alma_openvz.sh $CTID --revert`
+
+To revert to the second one, run this to get their IDs:
 ```
 CTID=put_ctid_here
 vzctl snapshot-list $CTID
