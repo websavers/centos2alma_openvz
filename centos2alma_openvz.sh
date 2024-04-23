@@ -43,6 +43,18 @@ function install_almaconvert {
 }
 
 # Changes to the container only via vzctl commands
+function reinstall_mariadb {
+    vzctl exec $CTID curl -LsS -O https://downloads.mariadb.com/MariaDB/mariadb_repo_setup
+    vzctl exec $CTID bash mariadb_repo_setup --mariadb-server-version=10.11
+    vzctl exec $CTID yum -y install boost-program-options MariaDB-server MariaDB-client MariaDB-shared
+    vzctl exec $CTID 'yum -y update MariaDB-server MariaDB-client MariaDB-shared MariaDB-*'
+    # Restore original config
+    vzctl exec $CTID mv /etc/my.cnf /etc/my.cnf.rpmnew
+    vzctl exec $CTID mv /etc/my.cnf.rpmsave /etc/my.cnf
+    vzctl exec $CTID systemctl restart mariadb
+    vzctl exec $CTID mysql_upgrade
+}
+
 function ct_prepare {
 
     echo "Creating snapshot prior to any changes..."
@@ -79,11 +91,11 @@ function ct_finish {
     echo "Reinstalling base Plesk packages..."
 
     vzctl exec $CTID "echo '[PSA_18_0_60-base]
-    name=PLESK_18_0_60 base
-    baseurl=http://autoinstall.plesk.com/pool/PSA_18.0.60_14244/dist-rpm-RedHat-el8-x86_64/
-    enabled=1
-    gpgcheck=1
-    ' > /etc/yum.repos.d/plesk-base-tmp.repo"
+name=PLESK_18_0_60 base
+baseurl=http://autoinstall.plesk.com/pool/PSA_18.0.60_14244/dist-rpm-RedHat-el8-x86_64/
+enabled=1
+gpgcheck=1
+' > /etc/yum.repos.d/plesk-base-tmp.repo"
 
     vzctl exec $CTID yum install plesk-release plesk-engine plesk-completion psa-autoinstaller psa-libxml-proxy plesk-repair-kit plesk-config-troubleshooter psa-updates psa-phpmyadmin
 
@@ -115,18 +127,6 @@ function ct_check {
     [ "$can_convert" = "" ] && echo "$CTID can *not* be converted to almalinux 8." && exit 1
     echo "$CTID can be converted to almalinux 8."
 
-}
-
-function reinstall_mariadb {
-    vzctl exec $CTID curl -LsS -O https://downloads.mariadb.com/MariaDB/mariadb_repo_setup
-    vzctl exec $CTID bash mariadb_repo_setup --mariadb-server-version=10.11
-    vzctl exec $CTID yum -y install boost-program-options MariaDB-server MariaDB-client MariaDB-shared
-    vzctl exec $CTID 'yum -y update MariaDB-server MariaDB-client MariaDB-shared MariaDB-*'
-    # Restore original config
-    vzctl exec $CTID mv /etc/my.cnf /etc/my.cnf.rpmnew
-    vzctl exec $CTID mv /etc/my.cnf.rpmsave /etc/my.cnf
-    vzctl exec $CTID systemctl restart mariadb
-    vzctl exec $CTID mysql_upgrade
 }
 
 #### STANDARD PROCESSING BEGINS HERE ####
