@@ -173,6 +173,9 @@ ct_prepare
 echo "STAGE 2: Conversion begins using almaconvert8. Do not interrupt unless failure reported."
 $AC_BIN convert $CTID --log /root/almaconvert8-$CTID.log
 
+echo ""
+echo ""
+
 echo "STAGE 3: Post-Conversion Repairs..."
 ct_finish
 
