@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Version 1.0b
+# Version 1.1b
 # Usage: ./centos2alma_openvz.sh <CTID>
 
 CTID=$1
@@ -33,7 +33,6 @@ function install_almaconvert {
         [ ! $? -eq 0 ] && echo "Unable to install vzdeploy8 / almaconvert8 packages. Exiting..." && exit 1
     fi
 
-    # TODO: Do we still need to do this if we're removing Plesk packages prior to running almaconvert8 anyway?
     if [ ! -f "$AC_BIN" ]; then
         echo "Creating modified version of almaconvert8 to ignore Plesk blocker checks..."
         cp /usr/bin/almaconvert8 $AC_BIN
