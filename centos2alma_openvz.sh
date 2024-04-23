@@ -6,18 +6,15 @@
 CTID=$1
 
 function install_almaconvert { 
-    echo "Installing virtuozzo packages..."
+    echo "Installing vzdeploy8 / almaconvert8 packages on local node..."
     yum install vzdeploy8 -y
     [ ! $? -eq 0 ] && echo "Unable to install vzdeploy8 / almaconvert8 packages. Exiting..." && exit 1
 
-    echo "Creating modified version of almaconvert8 to ignore Plesk..."
-    cp /usr/bin/almaconvert8 /root/almaconvert8-plesk
-    sed -i -e "s/BLOCKER_PKGS = {'plesk': 'Plesk', 'cpanel': 'cPanel'}/BLOCKER_PKGS = {'cpanel': 'cPanel'}/g"  /root/almaconvert8-plesk
-}
-
-function ct_database_backup {
-    echo "Creating database backup..."
-    vzctl exec $CTID 'if [ -f /etc/psa/.psa.shadow ]; then mysqldump -uadmin -p$(cat /etc/psa/.psa.shadow) -f --events --max_allowed_packet=1G --opt --all-databases 2> /root/all_databases_error.log | gzip --rsyncable > /root/all_databases_dump.sql.gz && if [ -s /root/all_databases_error.log ]; then cat /root/all_databases_error.log | mail -s "mysqldump errors for $(hostname)" reports@websavers.ca; fi fi'; 
+    if [ ! -f "/root/almaconvert8-plesk" ]; then
+        echo "Creating modified version of almaconvert8 to ignore Plesk blocker checks..."
+        cp /usr/bin/almaconvert8 /root/almaconvert8-plesk
+        sed -i -e "s/BLOCKER_PKGS = {'plesk': 'Plesk', 'cpanel': 'cPanel'}/BLOCKER_PKGS = {'cpanel': 'cPanel'}/g"  /root/almaconvert8-plesk
+    fi
 }
 
 function ct_prepare {
@@ -28,17 +25,49 @@ function ct_prepare {
     echo "Updating all packages to CentOS 7.9"
     vzctl exec $CTID yum update -y
 
-    ct_database_backup
+    echo "Creating database backup..."
+    vzctl exec $CTID 'if [ -f /etc/psa/.psa.shadow ]; then mysqldump -uadmin -p$(cat /etc/psa/.psa.shadow) -f --events --max_allowed_packet=1G --opt --all-databases 2> /root/all_databases_error.log | gzip --rsyncable > /root/all_databases_dump.sql.gz && if [ -s /root/all_databases_error.log ]; then cat /root/all_databases_error.log | mail -s "mysqldump errors for $(hostname)" reports@websavers.ca; fi fi'; 
 
     vzctl exec $CTID systemctl stop mariadb
 
-    echo "Removing conflicting packages, including Plesk packages..."
+    echo "Removing packages that conflict with the almaconvert8 conversion process, including Plesk RPMs..."
     vzctl exec $CTID rpm -e btrfs-progs --nodeps
     vzctl exec $CTID rpm -e python3-pip --nodeps
     vzctl exec $CTID yum -y remove "plesk-*"
     vzctl exec $CTID rpm -e openssl11-libs --nodeps
     vzctl exec $CTID rpm -e MariaDB-server MariaDB-client MariaDB-shared MariaDB-common MariaDB-compat --nodeps
     vzctl exec $CTID rpm -e python36-PyYAML --nodeps
+
+}
+
+function ct_finish {
+
+    vzctl exec $CTID yum install python3
+    vzctl exec $CTID sed -i -e 's/CentOS-7/RedHat-el8/g' /etc/yum.repos.d/plesk*
+    vzctl exec $CTID yum update -y
+
+    reinstall_mariadb
+
+    # Reload Plesk DB from backup (not certain we need this)
+    # vzctl exec $CTID 'zcat /var/lib/psa/dumps/mysql.plesk.core.prerm.18.0.60.20240419-175324.dump.gz | MYSQL_PWD=`cat /etc/psa/.psa.shadow` mysql -uadmin'
+
+    echo "Reinstalling base Plesk packages..."
+
+    vzctl exec $CTID "echo '[PSA_18_0_60-base]
+    name=PLESK_18_0_60 base
+    baseurl=http://autoinstall.plesk.com/pool/PSA_18.0.60_14244/dist-rpm-RedHat-el8-x86_64/
+    enabled=1
+    gpgcheck=1
+    ' > /etc/yum.repos.d/plesk-base-tmp.repo"
+
+    vzctl exec $CTID yum install plesk-release plesk-engine plesk-completion psa-autoinstaller psa-libxml-proxy plesk-repair-kit plesk-config-troubleshooter psa-updates psa-phpmyadmin
+
+    echo "Running Plesk Repair..."
+    vzctl exec $CTID plesk repair installation
+
+    echo "Cleaning up..."
+    vzctl exec $CTID rm -f /etc/yum.repos.d/plesk-base-tmp.repo
+    vzctl exec $CTID yum remove firewalld
 
 }
 
@@ -61,20 +90,39 @@ source /etc/os-release
 [ "$NAME" != "Virtuozzo" ] && echo "This must be run on an OpenVZ node, not within the container. Exiting..." && exit 1
 
 # Verify validity of CTID
-[ "$CTID" = "" ] && echo "No CTID paramters has been provided. Exiting..." && exit 1
+[ "$CTID" = "" ] && echo "The CTID paramter has NOT been provided. Exiting..." && exit 1
 vzlist $CTID >/dev/null
 [ ! $? -eq 0 ] && echo "CTID provided does not appear to be valid. Exiting..." && exit 1
 
-read -p "This will convert CTID $CTID to AlmaLinux 8. Are you sure you're ready to proceed? (y/n) " -n 1 -r
+
+# idiomatic parameter and option handling in sh
+while test $# -gt 0
+do
+    case "$1" in
+        --finish) echo "Finish parameter provided. Running only post-conversion repairs..."
+            ct_finish
+            exit 0
+            ;;
+        --prepare) echo "Prepare parameter provided. Running only pre-conversion (destructive) changes..."
+            ct_prepare
+            exit 0
+            ;;
+        #--*) echo "bad option $1"
+        #    ;;
+        #*) echo "argument $1"
+        #    ;;
+    esac
+    shift
+done
+
+read -p "The following process will convert CTID $CTID to AlmaLinux 8. Are you sure you're ready to proceed? (y/n) " -n 1 -r
 echo
 if ! [[ $REPLY =~ ^[Yy]$ ]] ; then
     exit
 fi
 
-echo "STAGE 1: Installing almaconvert8 utility"
-if [ ! -f "/root/almaconvert8-plesk" ]; then
-   install_almaconvert
-fi
+# Install and modify necessary utilities
+install_almaconvert
 
 read -p "Stages 2 and 3 are destructive. Ready to proceed? (y/n) " -n 1 -r
 echo
@@ -89,31 +137,6 @@ echo "STAGE 3: Conversion now in progress using almaconvert8. Do not interrupt u
 almaconvert8-plesk convert $CTID --log /root/almaconvert8-$CTID.log
 
 echo "STAGE 4: Post-Conversion Repairs"
-vzctl exec $CTID yum install python3
-vzctl exec $CTID sed -i -e 's/CentOS-7/RedHat-el8/g' /etc/yum.repos.d/plesk*
-vzctl exec $CTID yum update -y
-
-reinstall_mariadb
-
-# Reload Plesk DB from backup (not certain we need this)
-# vzctl exec $CTID 'zcat /var/lib/psa/dumps/mysql.plesk.core.prerm.18.0.60.20240419-175324.dump.gz | MYSQL_PWD=`cat /etc/psa/.psa.shadow` mysql -uadmin'
-
-echo "Reinstalling base Plesk packages..."
-
-vzctl exec $CTID "echo '[PSA_18_0_60-base]
-name=PLESK_18_0_60 base
-baseurl=http://autoinstall.plesk.com/pool/PSA_18.0.60_14244/dist-rpm-RedHat-el8-x86_64/
-enabled=1
-gpgcheck=1
-' > /etc/yum.repos.d/plesk-base-tmp.repo"
-
-vzctl exec $CTID yum install plesk-release plesk-engine plesk-completion psa-autoinstaller psa-libxml-proxy plesk-repair-kit plesk-config-troubleshooter psa-updates psa-phpmyadmin
-
-echo "Running Plesk Repair..."
-vzctl exec $CTID plesk repair installation
-
-echo "Cleaning up..."
-vzctl exec $CTID rm -f /etc/yum.repos.d/plesk-base-tmp.repo
-vzctl exec $CTID yum remove firewalld
+ct_finish
 
 echo "Conversion completed!"
