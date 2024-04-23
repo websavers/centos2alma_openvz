@@ -86,7 +86,11 @@ function ct_finish {
     reinstall_mariadb
 
     # Reload Plesk DB from backup (not certain we need this)
-    # vzctl exec $CTID 'zcat /var/lib/psa/dumps/mysql.plesk.core.prerm.18.0.60.20240419-175324.dump.gz | MYSQL_PWD=`cat /etc/psa/.psa.shadow` mysql -uadmin'
+    # vzctl exec $CTID 'zcat /var/lib/psa/dumps/mysql.plesk.core.prerm.18.0.60.*.dump.gz | MYSQL_PWD=`cat /etc/psa/.psa.shadow` mysql -uadmin'
+    
+    # Restore all databases from backup
+    echo "Restoring MariaDB databases..."
+    vzctl exec $CTID 'zcat /root/all_databases_dump.sql.gz | MYSQL_PWD=`cat /etc/psa/.psa.shadow` mysql -uadmin'
 
     echo "Reinstalling base Plesk packages..."
 
@@ -111,7 +115,7 @@ gpgcheck=1
 # Changes to the container only via vzctl commands
 function ct_revert {
 
-    SNAP_ID=$(vzctl snapshot-list $CTID -H -o UUID,NAME | grep $SNAPSHOT_NAME | awk '{print $1}')
+    SNAP_ID=$(vzctl snapshot-list $CTID -H -o UUID,NAME | grep $SNAPSHOT_NAME | sed -n '1p' | awk '{print $1}')
     echo "Reverting CTID $CTID to snapshot ID $SNAP_ID ..."
     vzctl snapshot-switch $CTID --id $SNAP_ID
     [ ! $? -eq 0 ] && echo "Failure switching to snapshot $SNAP_ID - Exiting..." && exit 1
