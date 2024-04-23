@@ -7,6 +7,20 @@ CTID=$1
 AC_BIN=/root/almaconvert8-plesk
 SNAPSHOT_NAME=CentOS7PleskBase
 
+# Check OS
+source /etc/os-release
+[ "$NAME" != "Virtuozzo" ] && echo "This must be run on an OpenVZ node, not within the container. Exiting..." && exit 1
+
+# Verify CTID
+[ "$CTID" = "" ] && echo "The CTID paramter has NOT been provided. Exiting..." && exit 1
+vzlist $CTID >/dev/null
+[ ! $? -eq 0 ] && echo "CTID provided does not appear to be valid. Exiting..." && exit 1
+
+# Even if the NAME value was provided rather than CTID, this ensures the CTID is used from now on
+CTID=$(vzlist $CTID -H -o ctid)
+
+###### FUNCTIONS BEGIN HERE ######
+
 # Changes to node packages
 function install_almaconvert { 
 
@@ -108,17 +122,6 @@ function reinstall_mariadb {
 
 #### STANDARD PROCESSING BEGINS HERE ####
 
-# Check OS
-source /etc/os-release
-[ "$NAME" != "Virtuozzo" ] && echo "This must be run on an OpenVZ node, not within the container. Exiting..." && exit 1
-
-# Verify validity of CTID
-[ "$CTID" = "" ] && echo "The CTID paramter has NOT been provided. Exiting..." && exit 1
-vzlist $CTID >/dev/null
-[ ! $? -eq 0 ] && echo "CTID provided does not appear to be valid. Exiting..." && exit 1
-
-
-# idiomatic parameter and option handling
 while test $# -gt 0
 do
     case "$1" in
