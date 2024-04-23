@@ -92,10 +92,10 @@ function ct_finish {
 
     reinstall_mariadb
 
-    # Reload Plesk DB from backup (not certain we need this)
-    # vzctl exec $CTID 'zcat /var/lib/psa/dumps/mysql.plesk.core.prerm.18.0.60.*.dump.gz | MYSQL_PWD=`cat /etc/psa/.psa.shadow` mysql -uadmin'
+    # Reload Plesk DB from backup
+    vzctl exec $CTID 'zcat /var/lib/psa/dumps/mysql.plesk.core.prerm.18.0.60.`date "+%Y%m%d"`-*dump.gz | MYSQL_PWD=`cat /etc/psa/.psa.shadow` mysql -uadmin'
     
-    # Restore all databases from backup
+    # Restore all databases from backup (don't seem to need this; only psa DB is removed)
     #echo "Restoring MariaDB databases..."
     #vzctl exec $CTID 'zcat /root/all_databases_dump.sql.gz | MYSQL_PWD=`cat /etc/psa/.psa.shadow` mysql -uadmin'
 
