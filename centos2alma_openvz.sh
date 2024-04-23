@@ -76,6 +76,14 @@ function ct_prepare {
 
 }
 
+function ct_convert {
+
+    $AC_BIN convert $CTID --log /root/almaconvert8-$CTID.log
+    echo ""
+    echo ""
+
+}
+
 # Changes to the container only via vzctl commands
 function ct_finish {
 
@@ -89,8 +97,8 @@ function ct_finish {
     # vzctl exec $CTID 'zcat /var/lib/psa/dumps/mysql.plesk.core.prerm.18.0.60.*.dump.gz | MYSQL_PWD=`cat /etc/psa/.psa.shadow` mysql -uadmin'
     
     # Restore all databases from backup
-    echo "Restoring MariaDB databases..."
-    vzctl exec $CTID 'zcat /root/all_databases_dump.sql.gz | MYSQL_PWD=`cat /etc/psa/.psa.shadow` mysql -uadmin'
+    #echo "Restoring MariaDB databases..."
+    #vzctl exec $CTID 'zcat /root/all_databases_dump.sql.gz | MYSQL_PWD=`cat /etc/psa/.psa.shadow` mysql -uadmin'
 
     echo "Reinstalling base Plesk packages..."
 
@@ -138,12 +146,16 @@ function ct_check {
 while test $# -gt 0
 do
     case "$1" in
-        --finish) echo "Finish parameter provided. Running only post-conversion repairs..."
-            ct_finish
+         --prepare) echo "Prepare parameter provided. Running only pre-conversion (destructive) changes..."
+            ct_prepare
             exit 0
             ;;
-        --prepare) echo "Prepare parameter provided. Running only pre-conversion (destructive) changes..."
-            ct_prepare
+         --convert) echo "Convert parameter provided. Running only conversion (destructive) changes..."
+            ct_convert
+            exit 0
+            ;;
+        --finish) echo "Finish parameter provided. Running only post-conversion repairs..."
+            ct_finish
             exit 0
             ;;
         --revert) echo "Revert parameter provided. Doing reversion to CentOS7 snapshot..."
@@ -175,10 +187,7 @@ echo "STAGE 1: Preparing container for conversion..."
 ct_prepare
 
 echo "STAGE 2: Conversion begins using almaconvert8. Do not interrupt unless failure reported."
-$AC_BIN convert $CTID --log /root/almaconvert8-$CTID.log
-
-echo ""
-echo ""
+ct_convert
 
 echo "STAGE 3: Post-Conversion Repairs..."
 ct_finish
