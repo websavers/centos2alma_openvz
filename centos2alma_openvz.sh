@@ -115,7 +115,7 @@ gpgcheck=1
 
     echo "Cleaning up..."
     vzctl exec $CTID rm -f /etc/yum.repos.d/plesk-base-tmp.repo
-    vzctl exec $CTID yum remove firewalld
+    vzctl exec $CTID yum -y remove firewalld
 
 }
 
