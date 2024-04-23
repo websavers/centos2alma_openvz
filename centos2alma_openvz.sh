@@ -25,7 +25,8 @@ CTID=$(vzlist $CTID -H -o ctid)
 function install_almaconvert { 
 
     if rpm -q --quiet vzdeploy8 ; then 
-        echo "Already have vzdeploy8. Skipping install..."
+        #echo "Already have vzdeploy8. Skipping install..."
+        echo ""
     else
         echo "Installing vzdeploy8 / almaconvert8 packages on local node..."
         yum install vzdeploy8 -y
@@ -46,9 +47,7 @@ function ct_prepare {
 
     echo "Creating snapshot prior to any changes..."
     vzctl snapshot $CTID --name $SNAPSHOT_NAME
-    
-    echo "Updating all packages to ensure we're running CentOS 7.9"
-    vzctl exec $CTID yum update -y
+    [ ! $? -eq 0 ] && echo "Snapshot failure. Exiting..." && exit 1
 
     echo "Creating database backup..."
     vzctl exec $CTID 'if [ -f /etc/psa/.psa.shadow ]; then mysqldump -uadmin -p$(cat /etc/psa/.psa.shadow) -f --events --max_allowed_packet=1G --opt --all-databases 2> /root/all_databases_error.log | gzip --rsyncable > /root/all_databases_dump.sql.gz && if [ -s /root/all_databases_error.log ]; then cat /root/all_databases_error.log | mail -s "mysqldump errors for $(hostname)" reports@websavers.ca; fi fi'; 
@@ -101,6 +100,7 @@ function ct_finish {
 function ct_revert {
 
     SNAP_ID=$(vzctl snapshot-list $CTID -H -o UUID,NAME | grep $SNAPSHOT_NAME | awk '{print $1}')
+    echo "Reverting CTID $CTID to snapshot ID $SNAP_ID ..."
     vzctl snapshot-switch $CTID --id $SNAP_ID
     [ ! $? -eq 0 ] && echo "Failure switching to snapshot $SNAP_ID - Exiting..." && exit 1
     vzctl snapshot-delete $CTID --id $SNAP_ID
@@ -112,7 +112,7 @@ function ct_check {
 
     install_almaconvert
     can_convert=$(almaconvert8 list | grep $CTID)
-    [ "$can_convert" -eq "" ] && echo "$CTID can *not* be converted to almalinux 8." && exit 1
+    [ "$can_convert" = "" ] && echo "$CTID can *not* be converted to almalinux 8." && exit 1
     echo "$CTID can be converted to almalinux 8."
 
 }
