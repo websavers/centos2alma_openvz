@@ -5,7 +5,9 @@
 
 CTID=$1
 AC_BIN=/root/almaconvert8-plesk
+SNAPSHOT_NAME=CentOS7PleskBase
 
+# Changes to the node packages
 function install_almaconvert { 
 
     if rpm -q --quiet vzdeploy8 ; then 
@@ -25,10 +27,11 @@ function install_almaconvert {
 
 }
 
+# Changes to the container only via vzctl commands
 function ct_prepare {
 
     echo "Creating snapshot prior to any changes..."
-    vzctl snapshot $CTID --name CentOS7PleskBeforeChanges
+    vzctl snapshot $CTID --name $SNAPSHOT_NAME
     
     echo "Updating all packages to CentOS 7.9"
     vzctl exec $CTID yum update -y
@@ -48,6 +51,7 @@ function ct_prepare {
 
 }
 
+# Changes to the container only via vzctl commands
 function ct_finish {
 
     vzctl exec $CTID yum install python3
@@ -76,6 +80,17 @@ function ct_finish {
     echo "Cleaning up..."
     vzctl exec $CTID rm -f /etc/yum.repos.d/plesk-base-tmp.repo
     vzctl exec $CTID yum remove firewalld
+
+}
+
+# Changes to the container only via vzctl commands
+function ct_revert {
+
+    SNAP_ID=$(vzctl snapshot-list $CTID -H -o UUID,NAME | grep $SNAPSHOT_NAME | awk '{print $1}')
+    vzctl snapshot-switch $CTID --id $SNAP_ID
+    [ ! $? -eq 0 ] && echo "Failure switching to snapshot $SNAP_ID - Exiting..." && exit 1
+    vzctl snapshot-delete $CTID --id $SNAP_ID
+    vzctl start $CTID
 
 }
 
@@ -113,6 +128,10 @@ do
             ;;
         --prepare) echo "Prepare parameter provided. Running only pre-conversion (destructive) changes..."
             ct_prepare
+            exit 0
+            ;;
+        --revert) echo "Revert parameter provided. Doing reversion to CentOS7 snapshot..."
+            ct_revert
             exit 0
             ;;
         #--*) echo "bad option $1"
