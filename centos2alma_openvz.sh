@@ -52,7 +52,6 @@ function reinstall_mariadb {
         vzctl exec $CTID mv /etc/my.cnf /etc/my.cnf.rpmnew
         vzctl exec $CTID mv /etc/my.cnf.rpmsave /etc/my.cnf
         vzctl exec $CTID systemctl restart mariadb
-        vzctl exec $CTID mysql_upgrade -uadmin -p`cat /etc/psa/.psa.shadow`
     fi
 }
 
@@ -106,8 +105,9 @@ function ct_finish {
     
     # Restore all databases from backup (this is done because psa and phpmyadmin dbs are removed)
     echo "If needed, restoring MariaDB databases..."
-    vzctl exec2 $CTID '[ ! -d "/varlib/mysql/psa"] && zcat /root/all_databases_dump.sql.gz | MYSQL_PWD=`cat /etc/psa/.psa.shadow` mysql -uadmin'
+    vzctl exec2 $CTID '[ ! -d "/varlib/mysql/psa" ] && zcat /root/all_databases_dump.sql.gz | MYSQL_PWD=`cat /etc/psa/.psa.shadow` mysql -uadmin'
     [ ! $? -eq 0 ] && echo "Failure restoring databases - Exiting..." && exit 1
+    vzctl exec $CTID 'mysql_upgrade -uadmin -p`cat /etc/psa/.psa.shadow`'
 
     echo "Reinstalling base Plesk packages..."
 
