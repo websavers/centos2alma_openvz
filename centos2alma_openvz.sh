@@ -144,7 +144,7 @@ function ct_revert {
 
     SNAP_ID=$(vzctl snapshot-list $CTID -H -o UUID,NAME | grep $SNAPSHOT_NAME | sed -n '1p' | awk '{print $1}')
     echo "Reverting CTID $CTID to snapshot ID $SNAP_ID ..."
-    vzctl snapshot-switch $CTID --id $SNAP_ID
+    vzctl snapshot-switch $CTID --id $SNAP_ID --skip-resume
     [ ! $? -eq 0 ] && echo "Failure switching to snapshot $SNAP_ID - Exiting..." && exit 1
     vzctl snapshot-delete $CTID --id $SNAP_ID
     vzctl start $CTID
