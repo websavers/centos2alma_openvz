@@ -153,6 +153,10 @@ gpgcheck=1
     echo "Running Plesk Repair..."
     vzctl exec $CTID plesk repair installation
 
+    echo "Reparing and restarting PHP-FPM..."
+    vzctl exec $CTID plesk repair web -php-handlers
+    vzctl exec $CTID 'systemctl restart plesk-php*'
+
     echo "Cleaning up..."
     vzctl exec $CTID rm -f /etc/yum.repos.d/plesk-base-tmp.repo
     vzctl exec $CTID yum -y remove firewalld
