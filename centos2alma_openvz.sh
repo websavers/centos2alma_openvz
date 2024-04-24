@@ -105,19 +105,22 @@ function ct_finish {
     #vzctl exec $CTID 'zcat /var/lib/psa/dumps/mysql.plesk.core.prerm.`cat /root/centos2alma/plesk_version`.`date "+%Y%m%d"`-*dump.gz | MYSQL_PWD=`cat /etc/psa/.psa.shadow` mysql -uadmin'
     
     # Restore all databases from backup (this is done because psa and phpmyadmin dbs are removed)
-    echo "Restoring MariaDB databases..."
-    vzctl exec $CTID 'zcat /root/all_databases_dump.sql.gz | MYSQL_PWD=`cat /etc/psa/.psa.shadow` mysql -uadmin'
+    echo "If needed, restoring MariaDB databases..."
+    vzctl exec2 $CTID '[ ! -d "/varlib/mysql/psa"] && zcat /root/all_databases_dump.sql.gz | MYSQL_PWD=`cat /etc/psa/.psa.shadow` mysql -uadmin'
+    [ ! $? -eq 0 ] && echo "Failure restoring databases - Exiting..." && exit 1
 
     echo "Reinstalling base Plesk packages..."
 
     vzctl exec $CTID 'PLESK_V=`cat /root/centos2alma/plesk_version` && echo "[PLESK-base]
 name=PLESK base
-baseurl=http://autoinstall.plesk.com/PSA_$PLESK_V/dist-rpm-RedHat-el8-x86_64/
+#baseurl=http://autoinstall.plesk.com/PSA_$PLESK_V/dist-rpm-RedHat-el8-x86_64/
+baseurl=http://autoinstall.plesk.com/pool/PSA_18.0.60_14244/dist-rpm-RedHat-el8-x86_64/
 enabled=1
 gpgcheck=1
 " > /etc/yum.repos.d/plesk-base-tmp.repo'
 
-    vzctl exec $CTID yum -y install plesk-release plesk-engine plesk-completion psa-autoinstaller psa-libxml-proxy plesk-repair-kit plesk-config-troubleshooter psa-updates psa-phpmyadmin
+    vzctl exec2 $CTID yum -y install plesk-release plesk-engine plesk-completion psa-autoinstaller psa-libxml-proxy plesk-repair-kit plesk-config-troubleshooter psa-updates psa-phpmyadmin
+    [ ! $? -eq 0 ] && echo "Failure with Plesk repository - Exiting..." && exit 1
 
     echo "Reinstalling Plesk components..."
     vzctl exec $CTID plesk installer install-all-updates
