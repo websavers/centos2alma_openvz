@@ -51,7 +51,7 @@ function reinstall_mariadb {
     vzctl exec $CTID mv /etc/my.cnf /etc/my.cnf.rpmnew
     vzctl exec $CTID mv /etc/my.cnf.rpmsave /etc/my.cnf
     vzctl exec $CTID systemctl restart mariadb
-    vzctl exec $CTID mysql_upgrade
+    vzctl exec $CTID mysql_upgrade -uadmin -p`cat /etc/psa/.psa.shadow`
 }
 
 function ct_prepare {
@@ -119,10 +119,10 @@ gpgcheck=1
     vzctl exec $CTID plesk installer remove --components nginx
     vzctl exec $CTID plesk installer add --components roundcube modsecurity nginx bind postfix dovecot resctrl php7.4 php8.0 php8.1 php8.2 php8.3
     
-    cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
-    cp /etc/nginx/nginx.conf.rpmsave /etc/nginx/nginx.conf
+    vzctl exec $CTID cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
+    vzctl exec $CTID cp /etc/nginx/nginx.conf.rpmsave /etc/nginx/nginx.conf
 
-    plesk sbin nginxmng -e
+    vzctl exec $CTID plesk sbin nginxmng -e
 
     echo "Running Plesk Repair..."
     vzctl exec $CTID plesk repair installation
