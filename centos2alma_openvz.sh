@@ -119,13 +119,13 @@ enabled=1
 gpgcheck=1
 " > /etc/yum.repos.d/plesk-base-tmp.repo'
 
-    vzctl exec2 $CTID yum -y install plesk-release plesk-engine plesk-completion psa-autoinstaller psa-libxml-proxy plesk-repair-kit plesk-config-troubleshooter psa-updates psa-phpmyadmin
+    vzctl exec2 $CTID 'yum -y install plesk-release plesk-engine plesk-completion psa-autoinstaller psa-libxml-proxy plesk-repair-kit plesk-config-troubleshooter psa-updates psa-phpmyadmin'
     [ ! $? -eq 0 ] && echo "Failure with Plesk repository - Exiting..." && exit 1
 
     echo "Reinstalling Plesk components..."
     vzctl exec $CTID 'plesk installer install-all-updates'
     vzctl exec $CTID 'plesk installer add --components `cat /root/centos2alma/plesk_components | grep -v config-troubleshooter`'
-    #vzctl exec $CTID plesk installer add --components roundcube modsecurity nginx bind postfix dovecot resctrl php7.4 php8.0 php8.1 php8.2 php8.3
+    #vzctl exec $CTID 'plesk installer add --components roundcube modsecurity nginx bind postfix dovecot resctrl php7.4 php8.0 php8.1 php8.2 php8.3'
 
     echo "Fixing phpMyAdmin..."
     # https://www.plesk.com/kb/support/plesk-repair-installation-shows-warning-phpmyadmin-was-configured-without-configuration-storage-in-database/
@@ -137,7 +137,7 @@ gpgcheck=1
     vzctl exec $CTID 'plesk installer add --components nginx'
     vzctl exec $CTID 'mv -f /etc/nginx/nginx.conf /etc/nginx/nginx.conf.new && cp /etc/nginx/nginx.conf.rpmsave /etc/nginx/nginx.conf'
     vzctl exec $CTID 'cp -f /etc/httpd/conf.d/security2.conf.rpmsave /etc/httpd/conf.d/security2.conf'
-    vzctl exec $CTID plesk sbin nginxmng -e
+    vzctl exec $CTID 'plesk sbin nginxmng -e'
 
     echo "Restoring roundcube config..."
     vzctl exec $CTID 'cp -f /usr/share/psa-roundcube/config/config.inc.php.rpmsave /usr/share/psa-roundcube/config/config.inc.php'    
@@ -151,15 +151,15 @@ gpgcheck=1
     done
 
     echo "Running Plesk Repair..."
-    vzctl exec $CTID plesk repair installation
+    vzctl exec $CTID 'plesk repair installation'
 
     echo "Reparing and restarting PHP-FPM..."
-    vzctl exec $CTID plesk repair web -php-handlers
+    vzctl exec $CTID 'plesk repair web -php-handlers'
     vzctl exec $CTID 'systemctl restart plesk-php*'
 
     echo "Cleaning up..."
-    vzctl exec $CTID rm -f /etc/yum.repos.d/plesk-base-tmp.repo
-    vzctl exec $CTID yum -y remove firewalld
+    vzctl exec $CTID 'rm -f /etc/yum.repos.d/plesk-base-tmp.repo'
+    vzctl exec $CTID 'yum -y remove firewalld'
 
 }
 
