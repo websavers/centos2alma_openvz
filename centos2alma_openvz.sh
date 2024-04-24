@@ -3,8 +3,10 @@
 # Version 1.2b
 # Usage: ./centos2alma_openvz.sh <CTID>
 
+mkdir /root/centos2alma
+
 CTID=$1
-AC_BIN=/root/almaconvert8-plesk
+AC_BIN=/root/centos2alma/almaconvert8-plesk
 SNAPSHOT_NAME=CentOS7PleskBase
 
 # Check OS
@@ -43,15 +45,17 @@ function install_almaconvert {
 
 # Changes to the container only via vzctl commands
 function reinstall_mariadb {
-    vzctl exec $CTID curl -LsS -O https://downloads.mariadb.com/MariaDB/mariadb_repo_setup
-    vzctl exec $CTID bash mariadb_repo_setup --mariadb-server-version=10.11
-    vzctl exec $CTID yum -y install boost-program-options MariaDB-server MariaDB-client MariaDB-shared
-    vzctl exec $CTID 'yum -y update MariaDB-server MariaDB-client MariaDB-shared MariaDB-*'
-    # Restore original config
-    vzctl exec $CTID mv /etc/my.cnf /etc/my.cnf.rpmnew
-    vzctl exec $CTID mv /etc/my.cnf.rpmsave /etc/my.cnf
-    vzctl exec $CTID systemctl restart mariadb
-    vzctl exec $CTID mysql_upgrade -uadmin -p`cat /etc/psa/.psa.shadow`
+    if ! vzctl exec $CTID grep "10.11" /etc/yum.repos.d/mariadb.repo; then
+        vzctl exec $CTID curl -LsS -O https://downloads.mariadb.com/MariaDB/mariadb_repo_setup
+        vzctl exec $CTID bash mariadb_repo_setup --mariadb-server-version=10.11
+        vzctl exec $CTID yum -y install boost-program-options MariaDB-server MariaDB-client MariaDB-shared
+        vzctl exec $CTID 'yum -y update MariaDB-server MariaDB-client MariaDB-shared MariaDB-*'
+        # Restore original config
+        vzctl exec $CTID mv /etc/my.cnf /etc/my.cnf.rpmnew
+        vzctl exec $CTID mv /etc/my.cnf.rpmsave /etc/my.cnf
+        vzctl exec $CTID systemctl restart mariadb
+        vzctl exec $CTID mysql_upgrade -uadmin -p`cat /etc/psa/.psa.shadow`
+    fi
 }
 
 function ct_prepare {
@@ -60,13 +64,14 @@ function ct_prepare {
     vzctl snapshot $CTID --name $SNAPSHOT_NAME
     [ ! $? -eq 0 ] && echo "Snapshot failure. Exiting..." && exit 1
 
+    echo "Saving Plesk version and components list for later restore..."
+    vzctl exec $CTID 'cat /etc/plesk-release | sed -n "1p" | sed -r "s/^([[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+).*/\1/" > /root/centos2alma/plesk_version'
+    vzctl exec $CTID 'plesk installer list PLESK_18_0_60 --components 2>&1 | grep -E "upgrade|up2date" | awk "{print \$1}" > /root/centos2alma/plesk_components'
+
     echo "Creating database backup..."
     vzctl exec $CTID 'if [ -f /etc/psa/.psa.shadow ]; then mysqldump -uadmin -p$(cat /etc/psa/.psa.shadow) -f --events --max_allowed_packet=1G --opt --all-databases 2> /root/all_databases_error.log | gzip --rsyncable > /root/all_databases_dump.sql.gz && if [ -s /root/all_databases_error.log ]; then cat /root/all_databases_error.log | mail -s "mysqldump errors for $(hostname)" reports@websavers.ca; fi fi'; 
 
     vzctl exec $CTID systemctl stop mariadb
-
-    # Save Plesk version for later use when re-downloading RPMs and restoring the PSA DB
-    vzctl exec cat /etc/plesk-release | sed -n '1p' | awk -F. '{print $1"."$2"."$3}' > /root/plesk_version
 
     echo "Removing packages that conflict with the almaconvert8 conversion process, including Plesk RPMs..."
     vzctl exec $CTID rpm -e btrfs-progs --nodeps
@@ -82,7 +87,7 @@ function ct_prepare {
 
 function ct_convert {
 
-    $AC_BIN convert $CTID --log /root/almaconvert8-$CTID.log
+    $AC_BIN convert $CTID --log /root/centos2alma/almaconvert8-$CTID.log
     echo ""
     echo ""
 
@@ -115,14 +120,15 @@ gpgcheck=1
 
     vzctl exec $CTID yum -y install plesk-release plesk-engine plesk-completion psa-autoinstaller psa-libxml-proxy plesk-repair-kit plesk-config-troubleshooter psa-updates psa-phpmyadmin
 
-    echo "Restoring necessary components"
+    echo "Reinstalling Plesk components..."
     vzctl exec $CTID plesk installer install-all-updates
     vzctl exec $CTID plesk installer remove --components nginx
-    vzctl exec $CTID plesk installer add --components roundcube modsecurity nginx bind postfix dovecot resctrl php7.4 php8.0 php8.1 php8.2 php8.3
+    vzctl exec $CTID 'plesk installer add --components `cat /root/centos2alma/plesk_components | grep -v config-troubleshooter`'
+    #vzctl exec $CTID plesk installer add --components roundcube modsecurity nginx bind postfix dovecot resctrl php7.4 php8.0 php8.1 php8.2 php8.3
     
+    echo "Fixing nginx config..."
     vzctl exec $CTID cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
     vzctl exec $CTID cp /etc/nginx/nginx.conf.rpmsave /etc/nginx/nginx.conf
-
     vzctl exec $CTID plesk sbin nginxmng -e
 
     echo "Running Plesk Repair..."
