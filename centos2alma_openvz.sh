@@ -142,20 +142,19 @@ gpgcheck=1
     echo "Restoring roundcube config..."
     vzctl exec $CTID 'cp -f /usr/share/psa-roundcube/config/config.inc.php.rpmsave /usr/share/psa-roundcube/config/config.inc.php'    
 
-    echo "Restoring PHP configs..."
-    PHP_VERSIONS="7.4 8.0 8.1 8.2 8.3"
+    echo "Reparing php-fpm handlers and Restoring PHP configs"
+    vzctl exec $CTID 'plesk repair web -php-handlers'
+    PHP_VERSIONS="7.0 7.1 7.2 7.3 7.4 8.0 8.1 8.2 8.3"
     for ver in $PHP_VERSIONS; do
         if [ -d /vz/root/$CTID/opt/plesk/php/$ver/ ]; then
             vzctl exec $CTID "cp -f /opt/plesk/php/$ver/etc/php.ini.rpmsave /opt/plesk/php/$ver/etc/php.ini"
+            handler_ver=$(echo $ver | sed "s/\.//")
+            vzctl exec $CTID "systemctl restart plesk-php$handler_ver-fpm"
         fi
     done
 
     echo "Running Plesk Repair..."
     vzctl exec $CTID 'plesk repair installation'
-
-    echo "Reparing and restarting PHP-FPM..."
-    vzctl exec $CTID 'plesk repair web -php-handlers'
-    vzctl exec $CTID 'systemctl restart plesk-php*'
 
     echo "Cleaning up..."
     vzctl exec $CTID 'rm -f /etc/yum.repos.d/plesk-base-tmp.repo'
