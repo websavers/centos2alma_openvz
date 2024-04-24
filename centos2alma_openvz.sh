@@ -123,15 +123,32 @@ gpgcheck=1
     [ ! $? -eq 0 ] && echo "Failure with Plesk repository - Exiting..." && exit 1
 
     echo "Reinstalling Plesk components..."
-    vzctl exec $CTID plesk installer install-all-updates
-    vzctl exec $CTID plesk installer remove --components nginx
+    vzctl exec $CTID 'plesk installer install-all-updates'
     vzctl exec $CTID 'plesk installer add --components `cat /root/centos2alma/plesk_components | grep -v config-troubleshooter`'
     #vzctl exec $CTID plesk installer add --components roundcube modsecurity nginx bind postfix dovecot resctrl php7.4 php8.0 php8.1 php8.2 php8.3
+
+    echo "Fixing phpMyAdmin..."
+    # https://www.plesk.com/kb/support/plesk-repair-installation-shows-warning-phpmyadmin-was-configured-without-configuration-storage-in-database/
+    vzctl exec $CTID 'plesk db "use mysql; DROP USER phpmyadmin@localhost; drop database phpmyadmin;"'
+    vzctl exec $CTID 'systemctl restart mariadb && rpm -e --nodeps psa-phpmyadmin && plesk installer update'
     
-    echo "Fixing nginx config..."
-    vzctl exec $CTID cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
-    vzctl exec $CTID cp /etc/nginx/nginx.conf.rpmsave /etc/nginx/nginx.conf
+    echo "Restoring nginx and modsec config..."
+    vzctl exec $CTID 'plesk installer remove --components nginx'
+    vzctl exec $CTID 'plesk installer add --components nginx'
+    vzctl exec $CTID 'mv -f /etc/nginx/nginx.conf /etc/nginx/nginx.conf.new && cp /etc/nginx/nginx.conf.rpmsave /etc/nginx/nginx.conf'
+    vzctl exec $CTID 'cp -f /etc/httpd/conf.d/security2.conf.rpmsave /etc/httpd/conf.d/security2.conf'
     vzctl exec $CTID plesk sbin nginxmng -e
+
+    echo "Restoring roundcube config..."
+    vzctl exec $CTID 'cp -f /usr/share/psa-roundcube/config/config.inc.php.rpmsave /usr/share/psa-roundcube/config/config.inc.php'    
+
+    echo "Restoring PHP configs..."
+    PHP_VERSIONS="7.4 8.0 8.1 8.2 8.3"
+    for ver in $PHP_VERSIONS; do
+        if [ -d /vz/root/$CTID/opt/plesk/php/$ver/ ]; then
+            vzctl exec $CTID "cp -f /opt/plesk/php/$ver/etc/php.ini.rpmsave /opt/plesk/php/$ver/etc/php.ini"
+        fi
+    done
 
     echo "Running Plesk Repair..."
     vzctl exec $CTID plesk repair installation
