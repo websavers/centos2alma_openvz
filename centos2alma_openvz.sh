@@ -71,6 +71,7 @@ function ct_prepare {
     echo "Removing packages that conflict with the almaconvert8 conversion process, including Plesk RPMs..."
     vzctl exec $CTID rpm -e btrfs-progs --nodeps
     vzctl exec $CTID rpm -e python3-pip --nodeps
+    vzctl exec $CTID rpm -e psa-phpmyadmin --nodeps
     vzctl exec $CTID yum -y remove "plesk-*"
     vzctl exec $CTID rpm -e openssl11-libs --nodeps
     vzctl exec $CTID rpm -e psa-mod_proxy --nodeps
@@ -90,7 +91,7 @@ function ct_convert {
 # Changes to the container only via vzctl commands
 function ct_finish {
 
-    vzctl exec $CTID yum -y install python3
+    vzctl exec $CTID yum -y install python3 perl-Net-Patricia
     vzctl exec $CTID sed -i -e 's/CentOS-7/RedHat-el8/g' /etc/yum.repos.d/plesk*
     vzctl exec $CTID yum -y update 
 
