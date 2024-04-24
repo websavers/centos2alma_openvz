@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Version 1.1b
+# Version 1.2b
 # Usage: ./centos2alma_openvz.sh <CTID>
 
 CTID=$1
@@ -116,8 +116,14 @@ gpgcheck=1
 
     echo "Restoring necessary components"
     vzctl exec $CTID plesk installer install-all-updates
-    vzctl exec $CTID plesk installer add --components modsecurity nginx bind postfix dovecot resctrl php7.4 php8.0 php8.1 php8.2 php8.3
+    vzctl exec $CTID plesk installer remove --components nginx
+    vzctl exec $CTID plesk installer add --components roundcube modsecurity nginx bind postfix dovecot resctrl php7.4 php8.0 php8.1 php8.2 php8.3
     
+    cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
+    cp /etc/nginx/nginx.conf.rpmsave /etc/nginx/nginx.conf
+
+    plesk sbin nginxmng -e
+
     echo "Running Plesk Repair..."
     vzctl exec $CTID plesk repair installation
 
