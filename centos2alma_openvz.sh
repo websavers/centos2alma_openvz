@@ -173,7 +173,7 @@ function ct_revert {
     vzctl snapshot-delete $CTID --id $SNAP_ID
     # Also remove the one created by almaconvert8 utility
     SNAP_ID_ALMACONVERT=$(vzctl snapshot-list $CTID -H -o UUID,NAME | grep Pre-Almalinux8 | sed -n '1p' | awk '{print $1}')
-    zctl snapshot-delete $CTID --id $SNAP_ID_ALMACONVERT
+    vzctl snapshot-delete $CTID --id $SNAP_ID_ALMACONVERT
     vzctl start $CTID
 
 }
