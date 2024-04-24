@@ -3,10 +3,8 @@
 # Version 1.2b
 # Usage: ./centos2alma_openvz.sh <CTID>
 
-mkdir /root/centos2alma
-
 CTID=$1
-AC_BIN=/root/centos2alma/almaconvert8-plesk
+AC_BIN=/root/almaconvert8-plesk
 SNAPSHOT_NAME=CentOS7PleskBase
 
 # Check OS
@@ -65,6 +63,7 @@ function ct_prepare {
     [ ! $? -eq 0 ] && echo "Snapshot failure. Exiting..." && exit 1
 
     echo "Saving Plesk version and components list for later restore..."
+    vzctl exec $CTID mkdir /root/centos2alma
     vzctl exec $CTID 'cat /etc/plesk-release | sed -n "1p" | sed -r "s/^([[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+).*/\1/" > /root/centos2alma/plesk_version'
     vzctl exec $CTID 'plesk installer list PLESK_18_0_60 --components 2>&1 | grep -E "upgrade|up2date" | awk "{print \$1}" > /root/centos2alma/plesk_components'
 
@@ -87,7 +86,7 @@ function ct_prepare {
 
 function ct_convert {
 
-    $AC_BIN convert $CTID --log /root/centos2alma/almaconvert8-$CTID.log
+    $AC_BIN convert $CTID --log /root/almaconvert8-$CTID.log
     echo ""
     echo ""
 
@@ -103,7 +102,7 @@ function ct_finish {
     reinstall_mariadb
 
     # Reload Plesk DB from backup
-    #vzctl exec $CTID 'zcat /var/lib/psa/dumps/mysql.plesk.core.prerm.`cat /root/plesk_version`.`date "+%Y%m%d"`-*dump.gz | MYSQL_PWD=`cat /etc/psa/.psa.shadow` mysql -uadmin'
+    #vzctl exec $CTID 'zcat /var/lib/psa/dumps/mysql.plesk.core.prerm.`cat /root/centos2alma/plesk_version`.`date "+%Y%m%d"`-*dump.gz | MYSQL_PWD=`cat /etc/psa/.psa.shadow` mysql -uadmin'
     
     # Restore all databases from backup (this is done because psa and phpmyadmin dbs are removed)
     echo "Restoring MariaDB databases..."
@@ -111,7 +110,7 @@ function ct_finish {
 
     echo "Reinstalling base Plesk packages..."
 
-    vzctl exec $CTID 'PLESK_V=`cat /root/plesk_version` && echo "[PLESK-base]
+    vzctl exec $CTID 'PLESK_V=`cat /root/centos2alma/plesk_version` && echo "[PLESK-base]
 name=PLESK base
 baseurl=http://autoinstall.plesk.com/PSA_$PLESK_V/dist-rpm-RedHat-el8-x86_64/
 enabled=1
