@@ -10,6 +10,17 @@ SNAP_ID=put_snapshot_id_here
 vzctl snapshot-delete $CTID --id $SNAP_ID
 ```
 
+You may also wish to remove old centos7 packages within the container. Here's some we found:
+```
+yum remove python-inotify python-dateutil pyxattr pyparsing alt-nghttp2 yum-metadata-parser python-gobject-base python-kitchen python-ply mozjs17 python-pycurl python-urlgrabber dbus-python python-iniparse python-enum34 python-decorator python-IPy pyliblzma pygpgme nginx-filesystem
+```
+
+You can run the following to see ones you have installed still:
+```
+rpm -qa | grep el7
+```
+Note: anything that says el7_9 is used in versions 7 through 9
+
 ## SolusVM
 For those using SolusVM, run these on your master to update the OS name. Be sure to replace HOSTNAME with the actual hostname of the container.
 ```
