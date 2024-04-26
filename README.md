@@ -72,15 +72,17 @@ Once you have confirmed the container is back to the original state, delete the 
 
 # Troubleshooting
 
-In the event Plesk still isn't working right after this script is complete, it's possbile running the official conversion utility's --finish option will help. I suspect doing so just duplicates the efforts of this script, but it's possible it has a couple extra tidbits in it to help. Here's how to do that:
+You can run each stage of this separately, so if any one part fails, you can re-run just that stage or start from the next if you've fixed the issue manually. Here are the stages:
 
-```
-mkdir /usr/local/psa/etc/awstats/
-wget https://github.com/plesk/centos2alma/releases/download/v1.2.4/centos2alma-1.2.4.zip
-unzip centos2alma-1.2.4.zip
-chmod 755 centos2alma
-./centos2alma --finish
-```
+Check if the almaconvert8 utility says it can be converted:
+`./centos2alma_openvz.sh <CTID> --check`
+Snapshot and remove conflicting packages like Plesk and MariaDB:
+`./centos2alma_openvz.sh <CTID> --prepare`
+Run almaconvert8 (also creates a snapshot of its own):
+`./centos2alma_openvz.sh <CTID> --convert`
+After conversion, reinstall MariaDB and Plesk packages and restore configurations:
+`./centos2alma_openvz.sh <CTID> --finish`
+
 
 Note: if Germany is blocked in firewall, the almalinux GPG key will fail to download.
 
