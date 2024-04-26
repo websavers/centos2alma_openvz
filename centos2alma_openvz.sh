@@ -43,16 +43,20 @@ function install_almaconvert {
 
 # Changes to the container only via vzctl commands
 function reinstall_mariadb {
-    if ! vzctl exec $CTID grep "10.11" /etc/yum.repos.d/mariadb.repo; then
-        vzctl exec $CTID curl -LsS -O https://downloads.mariadb.com/MariaDB/mariadb_repo_setup
-        vzctl exec $CTID bash mariadb_repo_setup --mariadb-server-version=10.11
-        vzctl exec $CTID yum -y install boost-program-options MariaDB-server MariaDB-client MariaDB-shared
-        vzctl exec $CTID 'yum -y update MariaDB-server MariaDB-client MariaDB-shared MariaDB-*'
-        # Restore original config
+    vzctl exec $CTID curl -LsS -O https://downloads.mariadb.com/MariaDB/mariadb_repo_setup
+    vzctl exec $CTID bash mariadb_repo_setup --mariadb-server-version=10.11
+
+    vzctl exec $CTID yum -y install boost-program-options MariaDB-server MariaDB-client MariaDB-shared
+    vzctl exec $CTID 'yum -y update MariaDB-server MariaDB-client MariaDB-shared MariaDB-*'
+
+    # Restore original config
+    if [ -f "/vz/root/$CTID/etc/my.cnf.rpmsave" ]; then
         vzctl exec $CTID mv /etc/my.cnf /etc/my.cnf.rpmnew
         vzctl exec $CTID mv /etc/my.cnf.rpmsave /etc/my.cnf
-        vzctl exec $CTID systemctl restart mariadb
     fi
+
+    vzctl exec $CTID systemctl restart mariadb
+    [ ! $? -eq 0 ] && echo "Error starting MariaDB. Exiting..." && exit 1
 }
 
 function ct_prepare {
@@ -80,6 +84,9 @@ function ct_prepare {
     vzctl exec $CTID rpm -e psa-mod_proxy --nodeps
     vzctl exec $CTID rpm -e MariaDB-server MariaDB-client MariaDB-shared MariaDB-common MariaDB-compat --nodeps
     vzctl exec $CTID rpm -e python36-PyYAML --nodeps
+    vzctl exec $CTID rpm -e fail2ban --nodeps
+    # Plesk Kolab dependencies:
+    vzctl exec $CTID 'yum -y remove erlang-*'
 
 }
 
@@ -95,9 +102,74 @@ function ct_convert {
 # Changes to the container only via vzctl commands
 function ct_finish {
 
-    vzctl exec $CTID yum -y install python3 perl-Net-Patricia
+    echo "Replacing plesk.repo with version without PHP 5.x"
+    vzctl exec $CTID 'echo "
+## Persistent repositories for Plesk Products.
+
+[PLESK_18_0_60-extras]
+name=PLESK_18_0_60 extras
+baseurl=http://autoinstall.plesk.com/pool/PSA_18.0.60_14244/extras-rpm-RedHat-el8-x86_64/
+enabled=1
+gpgcheck=1
+
+[PLESK_17_PHP71]
+name=PHP 7.1
+baseurl=http://autoinstall.plesk.com/pool/PHP_7.1.33_98/dist-rpm-CentOS-8-x86_64/
+enabled=1
+gpgcheck=1
+
+[PLESK_17_PHP72]
+name=PHP 7.2
+baseurl=http://autoinstall.plesk.com/pool/PHP_7.2.34_151/dist-rpm-CentOS-8-x86_64/
+enabled=1
+gpgcheck=1
+
+[PLESK_17_PHP73]
+name=PHP 7.3
+baseurl=http://autoinstall.plesk.com/pool/PHP_7.3.33_248/dist-rpm-CentOS-8-x86_64/
+enabled=1
+gpgcheck=1
+
+[PLESK_17_PHP74]
+name=PHP 7.4
+baseurl=http://autoinstall.plesk.com/PHP74_17/dist-rpm-RedHat-el8-x86_64/
+enabled=1
+gpgcheck=1
+
+[PLESK_17_PHP80]
+name=PHP 8.0
+baseurl=http://autoinstall.plesk.com/PHP80_17/dist-rpm-RedHat-el8-x86_64/
+enabled=1
+gpgcheck=1
+
+[PLESK_17_PHP81]
+name=PHP 8.1
+baseurl=http://autoinstall.plesk.com/PHP81_17/dist-rpm-RedHat-el8-x86_64/
+enabled=1
+gpgcheck=1
+
+[PLESK_17_PHP82]
+name=PHP 8.2
+baseurl=http://autoinstall.plesk.com/PHP82_17/dist-rpm-RedHat-el8-x86_64/
+enabled=1
+gpgcheck=1
+
+[PLESK_17_PHP83]
+name=PHP 8.3
+baseurl=http://autoinstall.plesk.com/PHP83_17/dist-rpm-RedHat-el8-x86_64/
+enabled=1
+gpgcheck=1
+" > /etc/yum.repos.d/plesk.repo'
+
     vzctl exec $CTID sed -i -e 's/CentOS-7/RedHat-el8/g' /etc/yum.repos.d/plesk*
-    vzctl exec $CTID yum -y update 
+
+    echo "Repairing epel repo..."
+    vzctl exec $CTID 'grep "Enterprise Linux 7" /etc/yum.repos.d/epel.repo >/dev/null && mv /etc/yum.repos.d/epel.repo /etc/yum.repos.d/epel.repo.old && mv /etc/yum.repos.d/epel.repo.rpmnew /etc/yum.repos.d/epel.repo'
+
+    vzctl exec $CTID yum -y install python3 perl-Net-Patricia
+    vzctl exec $CTID yum -y update
+
+    [ ! $? -eq 0 ] && echo "Yum failure - Exiting..." && exit 1
 
     reinstall_mariadb
 
