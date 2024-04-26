@@ -6,7 +6,7 @@ Check to be sure the container is recognized as convertible by almaconvert8:
 If all is well, begin conversion:
 `./centos2alma_openvz.sh <CTID>`
 
-During the run of almaconvert8 you will probably see the followin warnings, which can be ignored:
+During the run of almaconvert8 you will probably see the followin warnings. Ones about Plesk repos can be safely ignored:
 > Warning! Unsupported repositories detected
 
 IMPORTANT: Once you have confirmed the conversion has been successul and you do not need to reset to the CentOS 7 snapshot, run these commands to delete the snapshots created by this process:
