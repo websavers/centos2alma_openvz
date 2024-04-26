@@ -1,4 +1,11 @@
 # Usage
+
+Check to be sure the container is recognized as convertible by almaconvert8:
+
+`./centos2alma_openvz.sh <CTID> --check`
+
+If all is well, begin conversion:
+
 `./centos2alma_openvz.sh <CTID>`
 
 IMPORTANT: Once you have confirmed the conversion has been successul and you do not need to reset to the CentOS 7 snapshot, run these commands to delete the snapshots created by this process:
