@@ -75,13 +75,16 @@ Once you have confirmed the container is back to the original state, delete the 
 You can run each stage of this separately, so if any one part fails, you can re-run just that stage or start from the next if you've fixed the issue manually. Here are the stages:
 
 Check if the almaconvert8 utility says it can be converted:
-`./centos2alma_openvz.sh <CTID> --check`
+```./centos2alma_openvz.sh <CTID> --check```
+
 Snapshot and remove conflicting packages like Plesk and MariaDB:
-`./centos2alma_openvz.sh <CTID> --prepare`
+```./centos2alma_openvz.sh <CTID> --prepare```
+
 Run almaconvert8 (also creates a snapshot of its own):
-`./centos2alma_openvz.sh <CTID> --convert`
+```./centos2alma_openvz.sh <CTID> --convert```
+
 After conversion, reinstall MariaDB and Plesk packages and restore configurations:
-`./centos2alma_openvz.sh <CTID> --finish`
+```./centos2alma_openvz.sh <CTID> --finish```
 
 
 Note: if Germany is blocked in firewall, the almalinux GPG key will fail to download.
