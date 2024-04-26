@@ -101,6 +101,13 @@ After conversion, reinstall MariaDB and Plesk packages and restore configuration
 ./centos2alma_openvz.sh <CTID> --finish
 ```
 
+## PHP Verisons:
+
+If you did not adjust your PHP versions prior to conversion, you will likely need to run this now in the container:
+```
+plesk repair web -php-handlers
+```
+
 
 Note: if Germany is blocked in firewall, the almalinux GPG key will fail to download.
 
