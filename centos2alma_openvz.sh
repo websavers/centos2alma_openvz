@@ -66,12 +66,16 @@ function ct_prepare {
     [ ! $? -eq 0 ] && echo "Snapshot failure. Exiting..." && exit 1
 
     echo "Switching all domains on PHP versions older than 7.1 to version 7.1..."
-    for DOMAIN in $(plesk db -Ne "select name from hosting hos,domains dom where dom.id = hos.dom_id and php = 'true' AND php_handler_id LIKE 'plesk-php5%'"); do
+    vzctl exec '
+    for DOMAIN in $(plesk db -Ne "select name from hosting hos,domains dom where dom.id = hos.dom_id and php = true AND php_handler_id LIKE plesk-php5%"); do
         plesk bin domain -u $DOMAIN -php_handler_id plesk-php71-fpm
     done
-    for DOMAIN in $(plesk db -Ne "select name from hosting hos,domains dom where dom.id = hos.dom_id and php = 'true' AND php_handler_id LIKE 'plesk-php70-%'"); do
+    for DOMAIN in $(plesk db -Ne "select name from hosting hos,domains dom where dom.id = hos.dom_id and php = true AND php_handler_id LIKE plesk-php70-%"); do
         plesk bin domain -u $DOMAIN -php_handler_id plesk-php71-fpm
-    done
+    done'
+
+    echo "Removing PHP 5.x and 7.0"
+    vzctl exec $CTID 'plesk installer remove --components php5.5 php5.6 php7.0'
 
     echo "Saving Plesk version and components list for later restore..."
     vzctl exec $CTID mkdir /root/centos2alma
@@ -93,6 +97,9 @@ function ct_prepare {
     vzctl exec $CTID rpm -e MariaDB-server MariaDB-client MariaDB-shared MariaDB-common MariaDB-compat --nodeps
     vzctl exec $CTID rpm -e python36-PyYAML --nodeps
     vzctl exec $CTID rpm -e fail2ban --nodeps
+    # Plesk fail2ban dependencies:
+    vzctl exec $CTID rpm -e python-inotify --nodeps
+    vzctl exec $CTID rpm -e python2-inotify --nodeps
     # Plesk Kolab dependencies:
     vzctl exec $CTID 'yum -y remove erlang-*'
 
@@ -213,8 +220,7 @@ gpgcheck=1
     vzctl exec $CTID 'plesk db "use mysql; DROP USER phpmyadmin@localhost; drop database phpmyadmin;"'
     vzctl exec $CTID 'systemctl restart mariadb && rpm -e --nodeps psa-phpmyadmin && plesk installer update'
 
-    echo "Preventing roundcube errors during repairs..."
-    vzctl exec $CTID 'plesk installer add --components roundcube'
+    echo "Restoring roundcube config file..."
     vzctl exec $CTID 'pushd /usr/share/psa-roundcube/config/ && [ -f "config.inc.php.rpmsave" ] && mv -f config.inc.php config.inc.new && cp -f config.inc.php.rpmsave config.inc.php && popd'    
     
     echo "Restoring nginx and modsec config..."

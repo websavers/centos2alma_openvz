@@ -1,5 +1,7 @@
 # Usage
 
+IMPORTANT: This script *may* not accurately switch sites to PHP version 7.1 or higher (which is required for AlmaLinux 8), so it is recommended that you do so prior to conversion. If you're using 3rd party PHP versions of 7.0 or lower, you'll likely need to reinstall those after, then switch the sites back manually.
+
 Check to be sure the container is recognized as convertible by almaconvert8:
 `./centos2alma_openvz.sh <CTID> --check`
 
