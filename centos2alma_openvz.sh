@@ -67,15 +67,15 @@ function ct_prepare {
 
     echo "Switching all domains on PHP versions older than 7.1 to version 7.1..."
     vzctl exec2 $CTID '
-    for DOMAIN in $(plesk db -Ne "select name from hosting hos,domains dom where dom.id = hos.dom_id and php = true AND php_handler_id LIKE \"plesk-php5%\""); do
+    for DOMAIN in $(plesk db -Ne "SELECT name FROM hosting hos,domains dom WHERE dom.id = hos.dom_id AND php = \"true\" AND php_handler_id LIKE \"plesk-php5%\""); do
         plesk bin domain -u $DOMAIN -php_handler_id plesk-php71-fpm
     done
-    for DOMAIN in $(plesk db -Ne "select name from hosting hos,domains dom where dom.id = hos.dom_id and php = true AND php_handler_id LIKE \"plesk-php70-%\""); do
+    for DOMAIN in $(plesk db -Ne "SELECT name FROM hosting hos,domains dom WHERE dom.id = hos.dom_id AND php = \"true\" AND php_handler_id LIKE \"plesk-php70-%\""); do
         plesk bin domain -u $DOMAIN -php_handler_id plesk-php71-fpm
     done'
 
-    #echo "Removing PHP 5.x and 7.0"
-    #vzctl exec $CTID 'plesk installer remove --components php5.5 php5.6 php7.0'
+    echo "Removing PHP 5.x and 7.0"
+    vzctl exec $CTID 'plesk installer remove --components php5.5 php5.6 php7.0'
 
     echo "Saving Plesk version and components list for later restore..."
     vzctl exec $CTID mkdir /root/centos2alma
