@@ -189,13 +189,15 @@ gpgcheck=1
     reinstall_mariadb
 
     # Reload Plesk DB from backup
-    #vzctl exec $CTID 'zcat /var/lib/psa/dumps/mysql.plesk.core.prerm.`cat /root/centos2alma/plesk_version`.`date "+%Y%m%d"`-*dump.gz | MYSQL_PWD=`cat /etc/psa/.psa.shadow` mysql -uadmin'
-    
+    vzctl exec $CTID 'zcat /var/lib/psa/dumps/mysql.plesk.core.prerm.`cat /root/centos2alma/plesk_version`.`date "+%Y%m%d"`-*dump.gz | MYSQL_PWD=`cat /etc/psa/.psa.shadow` mysql -uadmin'
+    [ ! $? -eq 0 ] && echo "Failure restoring Plesk database (psa) - Exiting..." && exit 1
+
     # Restore all databases from backup (this is done because psa and phpmyadmin dbs are removed)
-    echo "Restoring MariaDB databases..."
-    vzctl exec2 $CTID '[ ! -d "/varlib/mysql/psa" ] && zcat /root/all_databases_dump.sql.gz | MYSQL_PWD=`cat /etc/psa/.psa.shadow` mysql -uadmin'
-    [ ! $? -eq 0 ] && echo "Failure restoring databases - Exiting..." && exit 1
-    vzctl exec $CTID 'mysql_upgrade -uadmin -p`cat /etc/psa/.psa.shadow`'
+    #echo "Restoring MariaDB databases..."
+    #vzctl exec2 $CTID '[ ! -d "/varlib/mysql/psa" ] && zcat /root/all_databases_dump.sql.gz | MYSQL_PWD=`cat /etc/psa/.psa.shadow` mysql -uadmin'
+    #[ ! $? -eq 0 ] && echo "Failure restoring databases - Exiting..." && exit 1
+
+    vzctl exec $CTID 'mysql_upgrade -uadmin -p`cat /etc/psa/.psa.shadow`'    
 
     echo "Reinstalling base Plesk packages..."
 
@@ -232,7 +234,7 @@ gpgcheck=1
 
     echo "Reparing php-fpm handlers and Restoring PHP configs"
     vzctl exec $CTID 'plesk repair web -php-handlers'
-    vzctl exec2 '
+    vzctl exec '
     PHP_VERSIONS="7.0 7.1 7.2 7.3 7.4 8.0 8.1 8.2 8.3"
     for ver in $PHP_VERSIONS; do
         if [ -f "/opt/plesk/php/$ver/etc/php.ini.rpmsave" ]; then
