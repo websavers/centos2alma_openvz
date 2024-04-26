@@ -17,7 +17,7 @@ vzlist $CTID >/dev/null
 [ ! $? -eq 0 ] && echo "CTID provided does not appear to be valid. Exiting..." && exit 1
 
 # Even if the NAME value was provided rather than CTID, this ensures the CTID is used from now on
-CTID=$(vzlist $CTID -H -o ctid)
+CTID=$(vzlist $CTID -H -o ctid | awk '{print $1}')
 
 ###### FUNCTIONS BEGIN HERE ######
 
