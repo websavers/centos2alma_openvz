@@ -52,6 +52,10 @@ In the event of failure, there are two snapshots you can revert to:
 To revert to the first/earliest snapshot, simply run:
 `./centos2alma_openvz.sh $CTID --revert`
 
+***IMPORTANT: this will delete all snapshots after successful reversion.***
+
+---
+
 To revert to the second one, run this to get their IDs:
 ```
 CTID=put_ctid_here
