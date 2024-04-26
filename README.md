@@ -11,6 +11,11 @@ If all is well, begin conversion:
 During the run of almaconvert8 you will probably see the followin warnings. Ones about Plesk repos can be safely ignored:
 > Warning! Unsupported repositories detected
 
+## Re-enable IP Address Banning / Fail2ban?
+
+If you had it enabled prior to conversion, you should re-enable it now: `systemctl restart fail2ban`
+
+## Removing snapshots after successful conversion
 IMPORTANT: Once you have confirmed the conversion has been successul and you do not need to reset to the CentOS 7 snapshot, run these commands to delete the snapshots created by this process:
 ```
 CTID=put_ctid_here
@@ -19,6 +24,8 @@ vzctl snapshot-list $CTID
 SNAP_ID=put_snapshot_id_here
 vzctl snapshot-delete $CTID --id $SNAP_ID
 ```
+
+## Old Packages
 
 You may also wish to remove old centos7 packages within the container. Here's some we found:
 ```
@@ -29,7 +36,7 @@ You can run the following to see ones you have installed still:
 ```
 rpm -qa | grep el7
 ```
-Note: anything that says el7_9 is used in versions 7 through 9
+Note: anything that says el7_9 is used in versions 7 through 9 and should probably remain
 
 ## SolusVM
 For those using SolusVM, run these on your master to update the OS name. Be sure to replace HOSTNAME with the actual hostname of the container.

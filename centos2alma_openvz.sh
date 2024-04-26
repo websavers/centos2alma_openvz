@@ -245,6 +245,18 @@ gpgcheck=1
     echo "Running Plesk Repair..."
     vzctl exec $CTID 'plesk repair installation'
 
+    echo "Reenabling Mod_Security / WAF..."
+    vzctl exec $CTID plesk bin server_pref --update-web-app-firewall -waf-rule-engine on
+
+    vzctl exec $CTID 'if [ -f "/usr/local/installatron/repair" ]; then
+    cd /usr/local/installatron/bin
+    mv run run.bak
+    mv php php.bak
+    ln -s /opt/plesk/php/8.1/bin/php run
+    ln -s /opt/plesk/php/8.1/bin/php php
+    /usr/local/installatron/repair -f --quick
+    fi'
+
     echo "Cleaning up..."
     vzctl exec $CTID 'rm -f /etc/yum.repos.d/plesk-base-tmp.repo'
     vzctl exec $CTID 'yum -y remove firewalld'
