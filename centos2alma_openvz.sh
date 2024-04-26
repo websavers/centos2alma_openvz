@@ -65,6 +65,14 @@ function ct_prepare {
     vzctl snapshot $CTID --name $SNAPSHOT_NAME
     [ ! $? -eq 0 ] && echo "Snapshot failure. Exiting..." && exit 1
 
+    echo "Switching all subscriptions on PHP versions older than 7.1 to version 7.1..."
+    for DOMAIN in $(plesk db -Ne "select name from hosting hos,domains dom where dom.id = hos.dom_id and php = 'true' AND php_handler_id LIKE 'plesk-php5%'"); do
+        plesk bin domain -u $DOMAIN -php_handler_id plesk-php71-fpm
+    done
+    for DOMAIN in $(plesk db -Ne "select name from hosting hos,domains dom where dom.id = hos.dom_id and php = 'true' AND php_handler_id LIKE 'plesk-php70-%'"); do
+        plesk bin domain -u $DOMAIN -php_handler_id plesk-php71-fpm
+    done
+
     echo "Saving Plesk version and components list for later restore..."
     vzctl exec $CTID mkdir /root/centos2alma
     vzctl exec $CTID 'cat /etc/plesk-release | sed -n "1p" | sed -r "s/^([[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+).*/\1/" > /root/centos2alma/plesk_version'
