@@ -54,6 +54,7 @@ To revert to the first/earliest snapshot, simply run:
 
 ***IMPORTANT: this will delete all snapshots after successful reversion.***
 
+If you wish to avoid deletion of the snapshots, please use the steps below to manually switch to the snapshot of choice.
 ---
 
 To revert to the second one, run this to get their IDs:
@@ -67,7 +68,7 @@ Run this to save the ID of the snapshot you want to restore to:
 
 Then switch to that snapshot and start the container:
 ```
-vzctl snapshot-switch $CTID --id $SNAP_ID
+vzctl snapshot-switch $CTID --id $SNAP_ID --skip-resume
 vzctl start $CTID
 ```
 
