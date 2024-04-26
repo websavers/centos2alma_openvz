@@ -86,6 +86,7 @@ function ct_prepare {
 function ct_convert {
 
     $AC_BIN convert $CTID --log /root/almaconvert8-$CTID.log
+    [ ! $? -eq 0 ] && echo "Failure running almaconvert8 - Exiting... to resume use --convert and --finish options" && exit 1
     echo ""
     echo ""
 
