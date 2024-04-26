@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Version 1.2b
+# Version 1.5b
 # Usage: ./centos2alma_openvz.sh <CTID>
 
 CTID=$1
