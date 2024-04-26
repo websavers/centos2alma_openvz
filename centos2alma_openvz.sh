@@ -177,7 +177,7 @@ gpgcheck=1
     #vzctl exec $CTID 'zcat /var/lib/psa/dumps/mysql.plesk.core.prerm.`cat /root/centos2alma/plesk_version`.`date "+%Y%m%d"`-*dump.gz | MYSQL_PWD=`cat /etc/psa/.psa.shadow` mysql -uadmin'
     
     # Restore all databases from backup (this is done because psa and phpmyadmin dbs are removed)
-    echo "If needed, restoring MariaDB databases..."
+    echo "Restoring MariaDB databases..."
     vzctl exec2 $CTID '[ ! -d "/varlib/mysql/psa" ] && zcat /root/all_databases_dump.sql.gz | MYSQL_PWD=`cat /etc/psa/.psa.shadow` mysql -uadmin'
     [ ! $? -eq 0 ] && echo "Failure restoring databases - Exiting..." && exit 1
     vzctl exec $CTID 'mysql_upgrade -uadmin -p`cat /etc/psa/.psa.shadow`'
