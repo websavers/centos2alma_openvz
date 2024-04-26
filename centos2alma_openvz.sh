@@ -66,7 +66,7 @@ function ct_prepare {
     [ ! $? -eq 0 ] && echo "Snapshot failure. Exiting..." && exit 1
 
     echo "Switching all domains on PHP versions older than 7.1 to version 7.1..."
-    vzctl exec $CTID '
+    vzctl exec2 $CTID '
     for DOMAIN in $(plesk db -Ne "select name from hosting hos,domains dom where dom.id = hos.dom_id and php = true AND php_handler_id LIKE \"plesk-php5%\""); do
         plesk bin domain -u $DOMAIN -php_handler_id plesk-php71-fpm
     done
