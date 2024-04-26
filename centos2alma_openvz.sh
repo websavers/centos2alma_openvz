@@ -205,7 +205,7 @@ gpgcheck=1
 
     echo "Reinstalling Plesk components..."
     vzctl exec $CTID 'plesk installer install-all-updates'
-    vzctl exec $CTID 'plesk installer add --components `cat /root/centos2alma/plesk_components | grep -v config-troubleshooter`'
+    vzctl exec $CTID 'plesk installer add --components `cat /root/centos2alma/plesk_components | grep -v -E "(config-troubleshooter|php5\.6|php7\.0)"`'
     #vzctl exec $CTID 'plesk installer add --components roundcube modsecurity nginx bind postfix dovecot resctrl php7.4 php8.0 php8.1 php8.2 php8.3'
 
     echo "Fixing phpMyAdmin..."
