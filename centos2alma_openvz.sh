@@ -204,16 +204,17 @@ gpgcheck=1
     # https://www.plesk.com/kb/support/plesk-repair-installation-shows-warning-phpmyadmin-was-configured-without-configuration-storage-in-database/
     vzctl exec $CTID 'plesk db "use mysql; DROP USER phpmyadmin@localhost; drop database phpmyadmin;"'
     vzctl exec $CTID 'systemctl restart mariadb && rpm -e --nodeps psa-phpmyadmin && plesk installer update'
+
+    echo "Preventing roundcube errors during repairs..."
+    vzctl exec $CTID 'plesk installer add --components roundcube'
+    vzctl exec $CTID 'pushd /usr/share/psa-roundcube/config/ && [ -f "config.inc.php.rpmsave" ] && mv -f config.inc.php config.inc.new && cp -f config.inc.php.rpmsave config.inc.php && popd'    
     
     echo "Restoring nginx and modsec config..."
     vzctl exec $CTID 'plesk installer remove --components nginx'
     vzctl exec $CTID 'plesk installer add --components nginx'
-    vzctl exec $CTID '[ -f "/etc/nginx/nginx.conf.rpmsave"] && mv -f /etc/nginx/nginx.conf /etc/nginx/nginx.conf.new && cp /etc/nginx/nginx.conf.rpmsave /etc/nginx/nginx.conf'
-    vzctl exec $CTID '[ -f "/etc/httpd/conf.d/security2.conf.rpmsave"] && cp -f /etc/httpd/conf.d/security2.conf.rpmsave /etc/httpd/conf.d/security2.conf'
+    vzctl exec $CTID '[ -f "/etc/nginx/nginx.conf.rpmsave" ] && mv -f /etc/nginx/nginx.conf /etc/nginx/nginx.conf.new && cp /etc/nginx/nginx.conf.rpmsave /etc/nginx/nginx.conf'
+    vzctl exec $CTID '[ -f "/etc/httpd/conf.d/security2.conf.rpmsave" ] && cp -f /etc/httpd/conf.d/security2.conf.rpmsave /etc/httpd/conf.d/security2.conf'
     vzctl exec $CTID 'plesk sbin nginxmng -e'
-
-    echo "Restoring roundcube config..."
-    vzctl exec $CTID '[ -f "/usr/share/psa-roundcube/config/config.inc.php.rpmsave"] && cp -f /usr/share/psa-roundcube/config/config.inc.php.rpmsave /usr/share/psa-roundcube/config/config.inc.php'    
 
     echo "Reparing php-fpm handlers and Restoring PHP configs"
     vzctl exec $CTID 'plesk repair web -php-handlers'
