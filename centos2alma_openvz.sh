@@ -208,18 +208,18 @@ gpgcheck=1
     echo "Restoring nginx and modsec config..."
     vzctl exec $CTID 'plesk installer remove --components nginx'
     vzctl exec $CTID 'plesk installer add --components nginx'
-    vzctl exec $CTID 'mv -f /etc/nginx/nginx.conf /etc/nginx/nginx.conf.new && cp /etc/nginx/nginx.conf.rpmsave /etc/nginx/nginx.conf'
-    vzctl exec $CTID 'cp -f /etc/httpd/conf.d/security2.conf.rpmsave /etc/httpd/conf.d/security2.conf'
+    vzctl exec $CTID '[ -f "/etc/nginx/nginx.conf.rpmsave"] && mv -f /etc/nginx/nginx.conf /etc/nginx/nginx.conf.new && cp /etc/nginx/nginx.conf.rpmsave /etc/nginx/nginx.conf'
+    vzctl exec $CTID '[ -f "/etc/httpd/conf.d/security2.conf.rpmsave"] && cp -f /etc/httpd/conf.d/security2.conf.rpmsave /etc/httpd/conf.d/security2.conf'
     vzctl exec $CTID 'plesk sbin nginxmng -e'
 
     echo "Restoring roundcube config..."
-    vzctl exec $CTID 'cp -f /usr/share/psa-roundcube/config/config.inc.php.rpmsave /usr/share/psa-roundcube/config/config.inc.php'    
+    vzctl exec $CTID '[ -f "/usr/share/psa-roundcube/config/config.inc.php.rpmsave"] && cp -f /usr/share/psa-roundcube/config/config.inc.php.rpmsave /usr/share/psa-roundcube/config/config.inc.php'    
 
     echo "Reparing php-fpm handlers and Restoring PHP configs"
     vzctl exec $CTID 'plesk repair web -php-handlers'
     PHP_VERSIONS="7.0 7.1 7.2 7.3 7.4 8.0 8.1 8.2 8.3"
     for ver in $PHP_VERSIONS; do
-        if [ -d /vz/root/$CTID/opt/plesk/php/$ver/ ]; then
+        if [ -f "/vz/root/$CTID/opt/plesk/php/$ver/etc/php.ini.rpmsave" ]; then
             vzctl exec $CTID "cp -f /opt/plesk/php/$ver/etc/php.ini.rpmsave /opt/plesk/php/$ver/etc/php.ini"
             handler_ver=$(echo $ver | sed "s/\.//")
             vzctl exec $CTID "systemctl restart plesk-php$handler_ver-fpm"
