@@ -234,14 +234,17 @@ gpgcheck=1
 
     echo "Reparing php-fpm handlers and Restoring PHP configs"
     vzctl exec $CTID 'plesk repair web -php-handlers'
-    vzctl exec '
+
+    vzctl exec $CTID '
     PHP_VERSIONS="7.0 7.1 7.2 7.3 7.4 8.0 8.1 8.2 8.3"
     for ver in $PHP_VERSIONS; do
         if [ -f "/opt/plesk/php/$ver/etc/php.ini.rpmsave" ]; then
-            vzctl exec $CTID "pushd /opt/plesk/php/$ver/etc/ && mv php.ini php.ini.new && cp php.ini.rpmsave php.ini && popd"
-            handler_ver=$(echo $ver | sed "s/\.//")
-            vzctl exec $CTID "systemctl restart plesk-php$handler_ver-fpm"
+            pushd /opt/plesk/php/$ver/etc/
+            mv php.ini php.ini.new
+            popd
         fi
+        handler_ver=$(echo $ver | sed "s/\.//")
+        systemctl restart plesk-php$handler_ver-fpm
     done'
 
     echo "Running Plesk Repair..."
