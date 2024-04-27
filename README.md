@@ -1,5 +1,4 @@
 # Usage
-
 IMPORTANT: This script *may* not accurately switch sites to PHP version 7.1 or higher (which is required for AlmaLinux 8), so it is recommended that you do so prior to conversion. If you're using 3rd party PHP versions of 7.0 or lower, you'll likely need to reinstall those after, then switch the sites back manually.
 
 Check to be sure the container is recognized as convertible by almaconvert8:
@@ -8,14 +7,20 @@ Check to be sure the container is recognized as convertible by almaconvert8:
 If all is well, begin conversion:
 `./centos2alma_openvz.sh <CTID>`
 
-During the run of almaconvert8 you will probably see the followin warnings. Ones about Plesk repos can be safely ignored:
+During the run of almaconvert8 you will probably see the following warnings. Ones about Plesk repos can be safely ignored:
 > Warning! Unsupported repositories detected
 
-## Re-enable IP Address Banning / Fail2ban?
+Logs from almaconvert8 will be stored in /root/almaconvert8-$CTID.log
+
+## After Conversion
+
+The following sections are actions you might wish to take after conversion.
+
+### Re-enable IP Address Banning / Fail2ban?
 
 If you had it enabled prior to conversion, you should re-enable it now: `systemctl restart fail2ban`
 
-## Removing snapshots after successful conversion
+### Removing snapshots after successful conversion
 IMPORTANT: Once you have confirmed the conversion has been successul and you do not need to reset to the CentOS 7 snapshot, run these commands to delete the snapshots created by this process:
 ```
 CTID=put_ctid_here
@@ -25,7 +30,7 @@ SNAP_ID=put_snapshot_id_here
 vzctl snapshot-delete $CTID --id $SNAP_ID
 ```
 
-## Old Packages
+### Old Packages
 You may also wish to remove old centos7 packages within the container. Here's some we found:
 ```
 yum remove python-inotify python-dateutil pyxattr pyparsing alt-nghttp2 yum-metadata-parser python-gobject-base python-kitchen python-ply mozjs17 python-pycurl python-urlgrabber dbus-python python-iniparse python-enum34 python-decorator python-IPy pyliblzma pygpgme nginx-filesystem
@@ -37,20 +42,17 @@ rpm -qa | grep el7
 ```
 Note: anything that says el7_9 is used in versions 7 through 9 and should probably remain
 
-## SolusVM
+### Using SolusVM?
 For those using SolusVM, run these on your master to update the OS name. Be sure to replace HOSTNAME with the actual hostname of the container.
 ```
 bash /root/solusvmdb.sh
 update vservers set templatename="almalinux-8-x86_64-ez" where hostname="HOSTNAME";
 ```
 
-## WHMCS
+### Using WHMCS?
 For those using WHMCS, you will want to adjust the OS template configurable option there as well.
 
-## Logging
-Logs from almaconvert8 will be stored in /root/almaconvert8-$CTID.log
-
-# Reverting to snapshot
+# Conversion Failure? Revert to snapshot
 In the event of failure, there are two snapshots you can revert to:
 
 1. The first is taken before any changes are made at all, and
@@ -83,6 +85,9 @@ Once you have confirmed the container is back to the original state, delete the 
 `vzctl snapshot-delete $CTID --id $SNAP_ID`
 
 # Troubleshooting
+
+If Germany is blocked by your firewall rules, the almalinux GPG key will fail to download.
+
 You can run each stage of this separately, so if any one part fails, you can re-run just that stage or start from the next if you've fixed the issue manually. Here are the stages:
 
 Check if the almaconvert8 utility says it can be converted:
@@ -104,15 +109,6 @@ After conversion, reinstall MariaDB and Plesk packages and restore configuration
 ```
 ./centos2alma_openvz.sh <CTID> --finish
 ```
-
-## PHP Verisons:
-If you did not adjust your PHP versions prior to conversion, you will likely need to run this now in the container:
-```
-plesk repair web -php-handlers
-```
-
-
-Note: if Germany is blocked in firewall, the almalinux GPG key will fail to download.
 
 # References
 - almaconvert8: https://docs.virtuozzo.com/virtuozzo_hybrid_server_7_users_guide/advanced-tasks/converting-containers-with-almaconvert8.html
