@@ -210,7 +210,7 @@ gpgcheck=1
 " > /etc/yum.repos.d/plesk-base-tmp.repo'
 
     vzctl exec2 $CTID 'yum -y install plesk-release plesk-engine plesk-completion psa-autoinstaller psa-libxml-proxy plesk-repair-kit plesk-config-troubleshooter psa-updates psa-phpmyadmin'
-    [ ! $? -eq 0 ] && echo "Failure with Plesk repository - Exiting..." && exit 1
+    [ ! $? -eq 0 ] && echo "Failure with Plesk yum repository - Exiting..." && exit 1
 
     echo "Reinstalling Plesk components..."
     vzctl exec $CTID 'plesk installer install-all-updates'
@@ -238,7 +238,7 @@ gpgcheck=1
     PHP_VERSIONS="7.0 7.1 7.2 7.3 7.4 8.0 8.1 8.2 8.3"
     for ver in $PHP_VERSIONS; do
         if [ -f "/opt/plesk/php/$ver/etc/php.ini.rpmsave" ]; then
-            vzctl exec $CTID "cp -f /opt/plesk/php/$ver/etc/php.ini.rpmsave /opt/plesk/php/$ver/etc/php.ini"
+            vzctl exec $CTID "pushd /opt/plesk/php/$ver/etc/ && mv php.ini php.ini.new && cp php.ini.rpmsave php.ini && popd"
             handler_ver=$(echo $ver | sed "s/\.//")
             vzctl exec $CTID "systemctl restart plesk-php$handler_ver-fpm"
         fi
@@ -246,7 +246,7 @@ gpgcheck=1
 
     echo "Running Plesk Repair..."
     vzctl exec $CTID 'plesk repair installation'
-
+    
     echo "Reenabling Mod_Security / WAF..."
     vzctl exec $CTID plesk bin server_pref --update-web-app-firewall -waf-rule-engine on
 
