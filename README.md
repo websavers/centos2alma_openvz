@@ -26,7 +26,6 @@ vzctl snapshot-delete $CTID --id $SNAP_ID
 ```
 
 ## Old Packages
-
 You may also wish to remove old centos7 packages within the container. Here's some we found:
 ```
 yum remove python-inotify python-dateutil pyxattr pyparsing alt-nghttp2 yum-metadata-parser python-gobject-base python-kitchen python-ply mozjs17 python-pycurl python-urlgrabber dbus-python python-iniparse python-enum34 python-decorator python-IPy pyliblzma pygpgme nginx-filesystem
@@ -49,7 +48,6 @@ update vservers set templatename="almalinux-8-x86_64-ez" where hostname="HOSTNAM
 For those using WHMCS, you will want to adjust the OS template configurable option there as well.
 
 ## Logging
-
 Logs from almaconvert8 will be stored in /root/almaconvert8-$CTID.log
 
 # Reverting to snapshot
@@ -85,7 +83,6 @@ Once you have confirmed the container is back to the original state, delete the 
 `vzctl snapshot-delete $CTID --id $SNAP_ID`
 
 # Troubleshooting
-
 You can run each stage of this separately, so if any one part fails, you can re-run just that stage or start from the next if you've fixed the issue manually. Here are the stages:
 
 Check if the almaconvert8 utility says it can be converted:
@@ -109,7 +106,6 @@ After conversion, reinstall MariaDB and Plesk packages and restore configuration
 ```
 
 ## PHP Verisons:
-
 If you did not adjust your PHP versions prior to conversion, you will likely need to run this now in the container:
 ```
 plesk repair web -php-handlers
@@ -119,6 +115,6 @@ plesk repair web -php-handlers
 Note: if Germany is blocked in firewall, the almalinux GPG key will fail to download.
 
 # References
-
 - almaconvert8: https://docs.virtuozzo.com/virtuozzo_hybrid_server_7_users_guide/advanced-tasks/converting-containers-with-almaconvert8.html
+- centos2alma Plesk repo issue: https://github.com/plesk/centos2alma/issues/87
 - Plesk Forum thread: https://talk.plesk.com/threads/upgrade-virtuozzo-container-from-centos-7.369729/
