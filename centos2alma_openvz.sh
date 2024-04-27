@@ -246,6 +246,7 @@ gpgcheck=1
 
     echo "Running Plesk Repair..."
     vzctl exec $CTID 'plesk repair installation'
+    vzctl exec $CTID 'plesk repair fs -y'
     
     echo "Reenabling Mod_Security / WAF..."
     vzctl exec $CTID plesk bin server_pref --update-web-app-firewall -waf-rule-engine on
