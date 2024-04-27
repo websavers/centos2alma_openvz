@@ -240,7 +240,7 @@ gpgcheck=1
     for ver in $PHP_VERSIONS; do
         if [ -f "/opt/plesk/php/$ver/etc/php.ini.rpmsave" ]; then
             pushd /opt/plesk/php/$ver/etc/
-            mv php.ini php.ini.new
+            mv php.ini php.ini.new && cp php.ini.rpmsave php.ini
             popd
         fi
         handler_ver=$(echo $ver | sed "s/\.//")
