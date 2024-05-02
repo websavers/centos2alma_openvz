@@ -1,5 +1,10 @@
+# Preparation
+
+**PHP <7.1**: This script does have some code to switch sites to PHP version 7.1 or higher (which is required for AlmaLinux 8), however the reliability of that switch hasn't been confirmed. Plus most should manually check to ensure the sites are compatible, so it is recommended that you switch all sites using PHP 5.x and 7.0 to PHP 7.1 or higher prior to conversion. If you're using 3rd party PHP versions of 7.0 or lower, you'll likely need to reinstall those after, then switch the sites back manually.
+
+**OpenVZ <7.0.21**: We tested this only with the latest release of OpenVZ, version 7.0.21. Some have reported issues with almaconvert8 encountering odd issues during conversion that are likely a result of converting using an earlier release of OpenVZ. We recommend updating all packages manually on both the node and the container prior to conversion. 
+
 # Usage
-IMPORTANT: This script *may* not accurately switch sites to PHP version 7.1 or higher (which is required for AlmaLinux 8), so it is recommended that you do so prior to conversion. If you're using 3rd party PHP versions of 7.0 or lower, you'll likely need to reinstall those after, then switch the sites back manually.
 
 Check to be sure the container is recognized as convertible by almaconvert8:
 `./centos2alma_openvz.sh <CTID> --check`
