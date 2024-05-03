@@ -4,7 +4,7 @@
 
 **OpenVZ <7.0.21**: We tested this only with the latest release of OpenVZ, version 7.0.21. Some have reported issues with almaconvert8 encountering odd issues during conversion that are likely a result of converting using an earlier release of OpenVZ. We recommend updating all packages manually on both the node and the container prior to conversion. 
 
-If you are using Virtuozzo, you need at least Hybrid Server 7.5 Update 6 Hotfix 1 (Version 7.5.6-112). Improvements were made to almaconvert8 with that version. Details here: https://docs.virtuozzo.com/virtuozzo_advisory_archive/virtuozzo-hybrid-server/VZA-2024-010.html
+In Virtuozzo versioning this equates to Hybrid Server 7.5 Update 6 Hotfix 1 (Version 7.5.6-112). Improvements were made to almaconvert8 with that version. Details here: https://docs.virtuozzo.com/virtuozzo_advisory_archive/virtuozzo-hybrid-server/VZA-2024-010.html
 
 # Usage
 
