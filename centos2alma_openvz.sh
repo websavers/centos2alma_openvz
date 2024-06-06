@@ -80,7 +80,9 @@ function ct_prepare {
     echo "Saving Plesk version and components list for later restore..."
     vzctl exec $CTID mkdir /root/centos2alma
     vzctl exec $CTID 'cat /etc/plesk-release | sed -n "1p" | sed -r "s/^([[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+).*/\1/" > /root/centos2alma/plesk_version'
-    vzctl exec $CTID 'plesk installer list PLESK_18_0_60 --components 2>&1 | grep -E "upgrade|up2date" | awk "{print \$1}" > /root/centos2alma/plesk_components'
+    vzctl exec $CTID 'cat /root/centos2alma/plesk_version | sed -r "s/\./_/g" > /root/centos2alma/plesk_version_underscores'
+    # config-troubleshooter component has spacing issues, so ignore it
+    vzctl exec $CTID 'plesk installer list PLESK_$(cat /root/centos2alma/plesk_version_underscores) --components 2>&1 | grep -E "upgrade|up2date" | grep -v "config-troubleshooter" | awk "{print \$1}" > /root/centos2alma/plesk_components'
 
     echo "Creating database backup..."
     vzctl exec $CTID 'if [ -f /etc/psa/.psa.shadow ]; then mysqldump -uadmin -p$(cat /etc/psa/.psa.shadow) -f --events --max_allowed_packet=1G --opt --all-databases 2> /root/all_databases_error.log | gzip --rsyncable > /root/all_databases_dump.sql.gz && if [ -s /root/all_databases_error.log ]; then cat /root/all_databases_error.log | mail -s "mysqldump errors for $(hostname)" reports@websavers.ca; fi fi'; 
@@ -108,7 +110,7 @@ function ct_prepare {
 function ct_convert {
 
     if [[ $(vzctl exec2 $CTID 'rpm -qa | grep -E "^plesk-.*"') ]]; then
-        echo "rpm says plesk-* packages are still installed. You likely need to run --prepare still. Exiting..." && exit 1;
+        echo "rpm shows plesk-* packages are still installed. You likely need to run --prepare still. Exiting..." && exit 1;
     fi
 
     $AC_BIN convert $CTID --log /root/almaconvert8-$CTID.log
@@ -122,12 +124,13 @@ function ct_convert {
 function ct_finish {
 
     echo "Replacing plesk.repo with version without PHP 5.x"
-    vzctl exec $CTID 'echo "
+    vzctl exec $CTID 'PLESK_VER=$(cat /root/centos2alma/plesk_version) && PLESK_VER_USCORES=$(cat /root/centos2alma/plesk_version_underscores) && 
+echo "
 ## Persistent repositories for Plesk Products.
 
-[PLESK_18_0_60-extras]
-name=PLESK_18_0_60 extras
-baseurl=http://autoinstall.plesk.com/pool/PSA_18.0.60_14244/extras-rpm-RedHat-el8-x86_64/
+[PLESK_$PLESK_VER_USCORES-extras]
+name=PLESK_$PLESK_VER_USCORES extras
+baseurl=http://autoinstall.plesk.com/PSA_$PLESK_VER/extras-rpm-RedHat-el8-x86_64/
 enabled=1
 gpgcheck=1
 
@@ -207,8 +210,8 @@ gpgcheck=1
 
     vzctl exec $CTID 'PLESK_V=`cat /root/centos2alma/plesk_version` && echo "[PLESK-base]
 name=PLESK base
-#baseurl=http://autoinstall.plesk.com/PSA_$PLESK_V/dist-rpm-RedHat-el8-x86_64/
-baseurl=http://autoinstall.plesk.com/pool/PSA_18.0.60_14244/dist-rpm-RedHat-el8-x86_64/
+baseurl=http://autoinstall.plesk.com/PSA_$PLESK_V/dist-rpm-RedHat-el8-x86_64/
+#baseurl=http://autoinstall.plesk.com/pool/PSA_18.0.60_14244/dist-rpm-RedHat-el8-x86_64/
 enabled=1
 gpgcheck=1
 " > /etc/yum.repos.d/plesk-base-tmp.repo'
