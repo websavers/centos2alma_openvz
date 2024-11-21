@@ -267,6 +267,7 @@ gpgcheck=1
     echo "Reenabling Mod_Security / WAF..."
     vzctl exec $CTID plesk bin server_pref --update-web-app-firewall -waf-rule-engine on
 
+    # If using Installatron
     vzctl exec $CTID 'if [ -f "/usr/local/installatron/repair" ]; then
     cd /usr/local/installatron/bin
     mv run run.bak
