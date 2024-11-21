@@ -37,6 +37,12 @@ function install_almaconvert {
         echo "Creating modified version of almaconvert8 to ignore Plesk blocker checks..."
         cp /usr/bin/almaconvert8 $AC_BIN
         sed -i -e "s/BLOCKER_PKGS = {'plesk': 'Plesk', 'cpanel': 'cPanel'}/BLOCKER_PKGS = {'cpanel': 'cPanel'}/g"  $AC_BIN
+    else 
+        # Line 52 is the one we changed purposefully. Anything else and we probably have a new version of almaconvert8
+        if cmp /usr/bin/almaconvert8 $AC_BIN | grep -v 'line 52'; then
+            cat /usr/bin/almaconvert8 > $AC_BIN
+            sed -i -e "s/BLOCKER_PKGS = {'plesk': 'Plesk', 'cpanel': 'cPanel'}/BLOCKER_PKGS = {'cpanel': 'cPanel'}/g"  $AC_BIN
+        fi
     fi
 
 }
