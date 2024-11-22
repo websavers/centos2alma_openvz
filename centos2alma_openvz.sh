@@ -189,7 +189,11 @@ enabled=1
 gpgcheck=1
 " > /etc/yum.repos.d/plesk.repo'
 
+    echo "Change Plesk repos from CentOS 7 to EL8"
     vzctl exec $CTID sed -i -e 's/CentOS-7/RedHat-el8/g' /etc/yum.repos.d/plesk*
+
+    echo "Removing TuxCare Repos (if utilized)"
+    vzctl exec $CTID 'rm -f /etc/yum.repos.d/centos7-els*'
 
     echo "Repairing epel repo..."
     vzctl exec $CTID 'grep "Enterprise Linux 7" /etc/yum.repos.d/epel.repo >/dev/null && mv /etc/yum.repos.d/epel.repo /etc/yum.repos.d/epel.repo.old && mv /etc/yum.repos.d/epel.repo.rpmnew /etc/yum.repos.d/epel.repo'
