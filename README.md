@@ -2,9 +2,15 @@
 
 **PHP <7.1**: This script does have some code to switch sites to PHP version 7.1 or higher (which is required for AlmaLinux 8), however the reliability of that switch hasn't been confirmed. Plus most should manually check to ensure the sites are compatible, so it is recommended that you switch all sites using PHP 5.x and 7.0 to PHP 7.1 or higher prior to conversion. If you're using 3rd party PHP versions of 7.0 or lower, you'll likely need to reinstall those after, then switch the sites back manually.
 
-**OpenVZ <7.0.21**: We tested this only with the latest release of OpenVZ, version 7.0.21. Some have reported issues with almaconvert8 encountering odd issues during conversion that are likely a result of converting using an earlier release of OpenVZ. We recommend updating all packages manually on both the node and the container prior to conversion. 
+**OpenVZ <7.0.21**: We have tested and confirmed the conversion process works with:
+- OpenVZ 7.0.21 (Virtuozzo Hybrid Server 7.5 Update 6 Hotfix 1 - Version 7.5.6-112)
+- OpenVZ 7.0.22
+- Plesk 17.0.60
+- Plesk 17.0.65
+- CentOS 7.9 stock
+- CentOS 7.9 with Tuxcare Repos (Nov 2024, version 1.7) 
 
-In Virtuozzo versioning this equates to Hybrid Server 7.5 Update 6 Hotfix 1 (Version 7.5.6-112). Improvements were made to almaconvert8 with that version. Details here: https://docs.virtuozzo.com/virtuozzo_advisory_archive/virtuozzo-hybrid-server/VZA-2024-010.html
+Any version of OpenVZ or Virtuozzo older than what's noted above is not likely to work. You should update all packages on both the node and the container prior to conversion. 
 
 # Usage
 
