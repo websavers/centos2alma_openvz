@@ -19,6 +19,8 @@ During the run of almaconvert8 you will probably see the following warnings. One
 
 Logs from almaconvert8 will be stored in /root/almaconvert8-$CTID.log
 
+The process takes approximately 35 minutes on a server with just 1 domain. Perhaps an additional 10 minutes when many domains.
+
 ## After Conversion
 
 The following sections are actions you might wish to take after conversion.
