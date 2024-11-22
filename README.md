@@ -28,6 +28,7 @@ The following sections are actions you might wish to take after conversion.
 If you had it enabled prior to conversion, you should re-enable it now: `systemctl restart fail2ban`
 
 ### Removing snapshots after successful conversion
+
 IMPORTANT: Once you have confirmed the conversion has been successul and you do not need to reset to the CentOS 7 snapshot, run these commands to delete the snapshots created by this process:
 ```
 CTID=put_ctid_here
@@ -37,7 +38,13 @@ SNAP_ID=put_snapshot_id_here
 vzctl snapshot-delete $CTID --id $SNAP_ID
 ```
 
+### TuxCare Licenses
+
+We remove the TuxCare repos to ensure everything works smoothly after conversion, however you will likely want to ensure to cancel any
+such licenses, whether through Plesk or TuxCare/CloudLinux directly.
+
 ### Old Packages
+
 You may also wish to remove old centos7 packages within the container. Here's some we found:
 ```
 yum remove python-inotify python-dateutil pyxattr pyparsing alt-nghttp2 yum-metadata-parser python-gobject-base python-kitchen python-ply mozjs17 python-pycurl python-urlgrabber dbus-python python-iniparse python-enum34 python-decorator python-IPy pyliblzma pygpgme nginx-filesystem
@@ -50,6 +57,7 @@ rpm -qa | grep el7
 Note: anything that says el7_9 is used in versions 7 through 9 and should probably remain
 
 ### Using SolusVM?
+
 For those using SolusVM, run these on your master to update the OS name. Be sure to replace HOSTNAME with the actual hostname of the container.
 ```
 bash /root/solusvmdb.sh
@@ -57,9 +65,11 @@ update vservers set templatename="almalinux-8-x86_64-ez" where hostname="HOSTNAM
 ```
 
 ### Using WHMCS?
+
 For those using WHMCS, you will want to adjust the OS template configurable option there as well.
 
 # Conversion Failure? Revert to snapshot
+
 In the event of failure, there are two snapshots you can revert to:
 
 1. The first is taken before any changes are made at all, and
