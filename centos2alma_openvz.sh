@@ -306,8 +306,8 @@ function ct_check {
 
     install_almaconvert
     can_convert=$(almaconvert8 list | grep $CTID)
-    [ "$can_convert" = "" ] && echo "$CTID can *not* be converted to almalinux 8." && exit 1
-    echo "$CTID can be converted to almalinux 8."
+    [ "$can_convert" = "" ] && echo "$CTID can *not* be converted to AlmaLinux 8." && exit 1
+    echo "$CTID can be converted to AlmaLinux 8."
 
 }
 

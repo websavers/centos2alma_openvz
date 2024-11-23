@@ -110,9 +110,21 @@ vzctl start $CTID
 Once you have confirmed the container is back to the original state, delete the snapshot:
 `vzctl snapshot-delete $CTID --id $SNAP_ID`
 
-# Troubleshooting
+# Troubleshooting Tips
 
-If Germany is blocked by your firewall rules, the almalinux GPG key will fail to download.
+### If the almalinux GPG key fails to download
+
+Germany is likely blocked by your firewall rules.
+
+### If almaconvert8 fails with an error like this: 
+
+`Failed to get VM config: The virtual machine could not be found. The virtual machine is not registered in the virtual machine directory on this server. Contact your Virtuozzo administrator for assistance.`
+
+This means the container does not use a newer UUID CTID *and* the NAME of the container does not match the CTID. When both the UUID (as prlctl sees it) and NAME do not match up with the CTID you've provided, vzlist continues to work, but prlctl does not. This can mess with almaconvert8. To fix it, be sure to have the CTID value saved and run this (or replace $CTID with the CTID):
+
+`vzctl set $CTID --name=$CTID --save`
+
+### General Troubleshooting
 
 You can run each stage of this separately, so if any one part fails, you can re-run just that stage or start from the next if you've fixed the issue manually. Here are the stages:
 
