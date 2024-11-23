@@ -66,8 +66,9 @@ Note: anything that says el7_9 is used in versions 7 through 9 and should probab
 
 ### Using SolusVM?
 
-For those using SolusVM, run these on your master to update the OS name. Be sure to replace HOSTNAME with the actual hostname of the container.
+For those using SolusVM, Install their DB helper script, then run these on your master to update the OS name. Be sure to replace HOSTNAME with the actual hostname of the container.
 ```
+curl -o /root/solusvmdb.sh https://raw.githubusercontent.com/solusvm-support/helpers/master/solusvmdb.sh
 bash /root/solusvmdb.sh
 update vservers set templatename="almalinux-8-x86_64-ez" where hostname="HOSTNAME";
 ```
