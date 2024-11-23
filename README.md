@@ -15,10 +15,10 @@ Any version of OpenVZ or Virtuozzo older than what's noted above is not likely t
 # Usage
 
 Check to be sure the container is recognized as convertible by almaconvert8:
-`./centos2alma_openvz.sh <CTID> --check`
+`./centos2alma_openvz.sh $CTID --check`
 
 If all is well, begin conversion:
-`./centos2alma_openvz.sh <CTID>`
+`./centos2alma_openvz.sh $CTID`
 
 During the run of almaconvert8 you will probably see the following warnings. Ones about Plesk repos can be safely ignored:
 > Warning! Unsupported repositories detected
@@ -117,22 +117,22 @@ You can run each stage of this separately, so if any one part fails, you can re-
 
 Check if the almaconvert8 utility says it can be converted:
 ```
-./centos2alma_openvz.sh <CTID> --check
+./centos2alma_openvz.sh $CTID --check
 ```
 
 Snapshot and remove conflicting packages like Plesk and MariaDB:
 ```
-./centos2alma_openvz.sh <CTID> --prepare
+./centos2alma_openvz.sh $CTID --prepare
 ```
 
 Run almaconvert8 (also creates a snapshot of its own):
 ```
-./centos2alma_openvz.sh <CTID> --convert
+./centos2alma_openvz.sh $CTID --convert
 ```
 
 After conversion, reinstall MariaDB and Plesk packages and restore configurations:
 ```
-./centos2alma_openvz.sh <CTID> --finish
+./centos2alma_openvz.sh $CTID --finish
 ```
 
 # References
