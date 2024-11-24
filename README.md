@@ -120,7 +120,7 @@ Germany is likely blocked by your firewall rules.
 
 `Failed to get VM config: The virtual machine could not be found. The virtual machine is not registered in the virtual machine directory on this server. Contact your Virtuozzo administrator for assistance.`
 
-This means the container does not use a newer UUID CTID *and* the NAME of the container does not match the CTID. When both the UUID (as prlctl sees it) and NAME do not match up with the CTID you've provided, vzlist continues to work, but prlctl does not. This can mess with almaconvert8. To fix it, be sure to have the CTID value saved and run this (or replace $CTID with the CTID):
+This means the container does not use a newer UUID CTID *and* the NAME of the container does not match the CTID. When at least one of either the UUID (longer CTIDs) or the NAME (shorter CTIDs, often resulting from a conversion from OpenVZ 6) do not match up with the CTID you've provided, prlctl fails to work on the container, which makes almaconvert8 fail since it relies upon it. To fix it run this (setting $CTID to the CTID):
 
 `vzctl set $CTID --name=$CTID --save`
 
