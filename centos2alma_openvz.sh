@@ -90,7 +90,7 @@ function ct_prepare {
     # config-troubleshooter component has spacing issues, so ignore it
     vzctl exec $CTID 'plesk installer list PLESK_$(cat /root/centos2alma/plesk_version_underscores) --components 2>&1 | grep -E "upgrade|up2date" | grep -v "config-troubleshooter" | awk "{print \$1}" > /root/centos2alma/plesk_components'
 
-    echo "Creating database backup..."
+    echo "Creating a backup of all databases at /root/all_databases_dump.sql.gz"
     vzctl exec $CTID 'if [ -f /etc/psa/.psa.shadow ]; then mysqldump -uadmin -p$(cat /etc/psa/.psa.shadow) -f --events --max_allowed_packet=1G --opt --all-databases 2> /root/all_databases_error.log | gzip --rsyncable > /root/all_databases_dump.sql.gz fi'; 
 
     vzctl exec $CTID systemctl stop mariadb
