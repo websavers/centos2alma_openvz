@@ -105,12 +105,13 @@ function ct_prepare {
     vzctl exec $CTID rpm -e MariaDB-server MariaDB-client MariaDB-shared MariaDB-common MariaDB-compat --nodeps
     vzctl exec $CTID rpm -e python36-PyYAML --nodeps
     vzctl exec $CTID rpm -e fail2ban --nodeps
-    vzctl exec $CTID rpm -e xmlrpc-c xmlrpc-c-c++ --nodeps
     # Plesk fail2ban dependencies:
     vzctl exec $CTID rpm -e python-inotify --nodeps
     vzctl exec $CTID rpm -e python2-inotify --nodeps
     # Plesk Kolab dependencies:
     vzctl exec $CTID 'yum -y remove erlang-*'
+    # Plesk unknown dependency, messes with reinstall in --finish:
+    vzctl exec $CTID rpm -e xmlrpc-c xmlrpc-c-c++ --nodeps
 
 }
 
