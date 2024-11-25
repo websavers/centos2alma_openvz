@@ -309,7 +309,7 @@ function ct_check {
     [ "$can_convert" = "" ] && echo "$CTID can *not* be converted to AlmaLinux 8." && exit 1
     echo "$CTID can be converted to AlmaLinux 8."
 
-    echo "Note: part of the 'almaconvert8 list' command is just looking to see if the template name ends with centos-7-x86_64 or centos-7 and so isn't really a valid way of knowing if the upgrade is truly possible. Simply change your template name in the CT config file to match that pattern."
+    echo "Note: part of the 'almaconvert8 list' command is just looking to see if the template name ends with centos-7-x86_64 or centos-7. If this fails, try changing the template name in the CT config file (/vz/private/$CTID/ve.conf) to match that pattern."
 
 }
 
