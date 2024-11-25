@@ -91,7 +91,7 @@ function ct_prepare {
     vzctl exec $CTID 'plesk installer list PLESK_$(cat /root/centos2alma/plesk_version_underscores) --components 2>&1 | grep -E "upgrade|up2date" | grep -v "config-troubleshooter" | awk "{print \$1}" > /root/centos2alma/plesk_components'
 
     echo "Creating database backup..."
-    vzctl exec $CTID 'if [ -f /etc/psa/.psa.shadow ]; then mysqldump -uadmin -p$(cat /etc/psa/.psa.shadow) -f --events --max_allowed_packet=1G --opt --all-databases 2> /root/all_databases_error.log | gzip --rsyncable > /root/all_databases_dump.sql.gz && if [ -s /root/all_databases_error.log ]; then cat /root/all_databases_error.log | mail -s "mysqldump errors for $(hostname)" reports@websavers.ca; fi fi'; 
+    vzctl exec $CTID 'if [ -f /etc/psa/.psa.shadow ]; then mysqldump -uadmin -p$(cat /etc/psa/.psa.shadow) -f --events --max_allowed_packet=1G --opt --all-databases 2> /root/all_databases_error.log | gzip --rsyncable > /root/all_databases_dump.sql.gz fi'; 
 
     vzctl exec $CTID systemctl stop mariadb
 
