@@ -305,9 +305,11 @@ function ct_revert {
 function ct_check {
 
     install_almaconvert
-    can_convert=$(almaconvert8 list | grep $CTID)
+    can_convert=$($AC_BIN list | grep $CTID)
     [ "$can_convert" = "" ] && echo "$CTID can *not* be converted to AlmaLinux 8." && exit 1
     echo "$CTID can be converted to AlmaLinux 8."
+
+    echo "Note: part of the 'almaconvert8 list' command is just looking to see if the template name ends with centos-7-x86_64 or centos-7 and so isn't really a valid way of knowing if the upgrade is truly possible."
 
 }
 
