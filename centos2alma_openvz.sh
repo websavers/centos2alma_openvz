@@ -112,6 +112,8 @@ function ct_prepare {
     vzctl exec $CTID 'yum -y remove erlang-*'
     # Plesk unknown dependency, messes with reinstall in --finish:
     vzctl exec $CTID rpm -e xmlrpc-c xmlrpc-c-c++ --nodeps
+    # Remove Tuxcare Bind packages to allow Plesk to install them fresh from AL8 repo
+    vzctl exec $CTID 'yum -y remove bind*tuxcare*'
 
 }
 
