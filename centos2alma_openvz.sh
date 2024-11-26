@@ -283,9 +283,22 @@ gpgcheck=1
     /usr/local/installatron/repair -f --quick
     fi'
 
+    # If using Imunify360
+    if [[ $(vzctl exec $CTID 'systemctl | grep imunify360') ]]; then
+        echo "Repairing Imunify360..."
+        vzctl exec $CTID 'wget http://repo.imunify360.cloudlinux.com/defence360/i360deploy.sh -O /root/i360deploy.sh && bash /root/i360deploy.sh'
+        vzctl exec $CTID 'yum -y remove firewalld'
+    fi
+    
+    # If using Plesk Firewall
+    if grep -q "psa-firewall" /root/centos2alma/plesk_components; then
+        vzctl exec $CTID 'yum -y remove firewalld'
+        echo "Please check that Plesk Firewall is currently active."
+    fi
+    
+
     echo "Cleaning up..."
     vzctl exec $CTID 'rm -f /etc/yum.repos.d/plesk-base-tmp.repo'
-    vzctl exec $CTID 'yum -y remove firewalld'
 
 }
 
