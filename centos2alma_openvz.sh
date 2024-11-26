@@ -293,10 +293,14 @@ gpgcheck=1
     fi
     
     # If using Plesk Firewall
-    if grep -q "psa-firewall" /root/centos2alma/plesk_components; then
+    if [[ $(vzctl exec $CTID 'grep -q "psa-firewall" /root/centos2alma/plesk_components') ]]; then
         vzctl exec $CTID 'yum -y remove firewalld'
         echo "Please check that Plesk Firewall is currently active."
     fi
+
+    # Since Plesk enables this on new installs and it's better for security, enable it now
+    echo "Enabling apache listen only on localhost mode..."
+    vzctl exec $CTID 'plesk bin apache --listen-on-localhost true'
 
     echo "Cleaning up..."
     vzctl exec $CTID 'rm -f /etc/yum.repos.d/plesk-base-tmp.repo'
