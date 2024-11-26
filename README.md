@@ -49,7 +49,7 @@ vzctl snapshot-delete $CTID --id $SNAP_ID
 ### TuxCare Licenses
 
 We remove the TuxCare repos to ensure everything works smoothly after conversion, however you will likely want to ensure to cancel any
-such licenses, whether through Plesk or TuxCare/CloudLinux directly.
+such licenses, whether through Plesk or TuxCare/CloudLinux directly. Note: in our testing, Plesk *appears* to automatically cancel any TuxCare licenses through them upon license refresh.
 
 ### Old Packages
 
