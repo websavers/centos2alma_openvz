@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Version 1.7
+# Version 1.8
 # Usage: ./centos2alma_openvz.sh <CTID>
 
 CTID=$1
@@ -295,7 +295,6 @@ gpgcheck=1
         vzctl exec $CTID 'yum -y remove firewalld'
         echo "Please check that Plesk Firewall is currently active."
     fi
-    
 
     echo "Cleaning up..."
     vzctl exec $CTID 'rm -f /etc/yum.repos.d/plesk-base-tmp.repo'
