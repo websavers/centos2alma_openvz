@@ -1,6 +1,6 @@
 # Preparation / Requirements
 
-**PHP <7.1**: This script does have some code to switch sites to PHP version 7.1 or higher (which is required for AlmaLinux 8), however the reliability of that switch hasn't been confirmed. Plus most should manually check to ensure the sites are compatible, so it is recommended that you switch all sites using PHP 5.x and 7.0 to PHP 7.1 or higher prior to conversion. If you're using 3rd party PHP versions of 7.0 or lower, you'll likely need to reinstall those after, then switch the sites back manually.
+**PHP <7.1**: This script will switch any sites using PHP earlier than 7.1 to PHP 7.1 (which is required for AlmaLinux 8), however the reliability of that switch hasn't been confirmed. We recommend switching the sites manually prior to conversion so you can check to ensure the sites are compatible. If you're using 3rd party PHP versions of 7.0 or lower, you'll likely need to reinstall those after, then switch the sites back manually.
 
 **OpenVZ <7.0.21**: We have tested and confirmed the conversion process works with:
 - OpenVZ 7.0.21 (Virtuozzo Hybrid Server 7.5 Update 6 Hotfix 1 - Version 7.5.6-112)
