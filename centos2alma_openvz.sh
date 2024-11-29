@@ -71,6 +71,9 @@ function ct_prepare {
     vzctl snapshot $CTID --name $SNAPSHOT_NAME
     [ ! $? -eq 0 ] && echo "Snapshot failure. Exiting..." && exit 1
 
+    echo "Stopping mail services..."
+    vzctl exec 'systemctl stop postfix dovecot'
+
     echo "Switching all domains on PHP versions older than 7.1 to version 7.1..."
     vzctl exec2 $CTID '
     for DOMAIN in $(plesk db -Ne "SELECT name FROM hosting hos,domains dom WHERE dom.id = hos.dom_id AND php = \"true\" AND php_handler_id LIKE \"plesk-php5%\""); do
