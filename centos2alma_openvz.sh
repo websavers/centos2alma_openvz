@@ -205,14 +205,17 @@ gpgcheck=1
     echo "Repairing epel repo..."
     vzctl exec $CTID 'grep "Enterprise Linux 7" /etc/yum.repos.d/epel.repo >/dev/null && mv /etc/yum.repos.d/epel.repo /etc/yum.repos.d/epel.repo.old && mv /etc/yum.repos.d/epel.repo.rpmnew /etc/yum.repos.d/epel.repo'
 
+    echo "Reinstalling necessary packages..."
     vzctl exec $CTID yum -y install python3 perl-Net-Patricia
     vzctl exec $CTID yum -y update
 
     [ ! $? -eq 0 ] && echo "Yum failure - Exiting..." && exit 1
 
+    echo "Reinstalling MariaDB..."
     reinstall_mariadb
 
     # Reload Plesk DB from backup
+    echo "Restoring Plesk Database..."
     vzctl exec $CTID 'zcat /var/lib/psa/dumps/mysql.plesk.core.prerm.`cat /root/centos2alma/plesk_version`.`date "+%Y%m%d"`-*dump.gz | MYSQL_PWD=`cat /etc/psa/.psa.shadow` mysql -uadmin'
     [ ! $? -eq 0 ] && echo "Failure restoring Plesk database (psa) - Exiting..." && exit 1
 
