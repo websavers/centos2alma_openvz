@@ -115,8 +115,6 @@ function ct_prepare {
     vzctl exec $CTID 'yum -y remove erlang-*'
     # Plesk unknown dependency, messes with reinstall in --finish:
     vzctl exec $CTID rpm -e xmlrpc-c xmlrpc-c-c++ --nodeps
-    # Remove Tuxcare Bind packages to allow Plesk to install them fresh from AL8 repo
-    vzctl exec $CTID 'yum -y remove bind*tuxcare*'
 
 }
 
@@ -203,6 +201,9 @@ gpgcheck=1
 
     echo "Removing TuxCare Repos (if utilized)"
     vzctl exec $CTID 'rm -f /etc/yum.repos.d/centos7-els*'
+
+    # Should replace Tuxcare BIND packages with those in AL8 repo
+    vzctl exec $CTID 'yum -y reinstall bind*'
 
     echo "Repairing epel repo..."
     vzctl exec $CTID 'grep "Enterprise Linux 7" /etc/yum.repos.d/epel.repo >/dev/null && mv /etc/yum.repos.d/epel.repo /etc/yum.repos.d/epel.repo.old && mv /etc/yum.repos.d/epel.repo.rpmnew /etc/yum.repos.d/epel.repo'
