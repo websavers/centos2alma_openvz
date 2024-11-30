@@ -136,6 +136,8 @@ function ct_convert {
 # Changes to the container only via vzctl commands
 function ct_finish {
 
+    vzctl exec $CTID systemctl stop grafana-server
+
     echo "Replacing plesk.repo with version without PHP 5.x"
     vzctl exec $CTID 'PLESK_VER=$(cat /root/centos2alma/plesk_version) && PLESK_VER_USCORES=$(cat /root/centos2alma/plesk_version_underscores) && 
 echo "
@@ -310,6 +312,7 @@ gpgcheck=1
 
     echo "Cleaning up..."
     vzctl exec $CTID 'rm -f /etc/yum.repos.d/plesk-base-tmp.repo'
+    vzctl exec $CTID systemctl start grafana-server
 
 }
 
