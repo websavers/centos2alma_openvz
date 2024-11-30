@@ -72,7 +72,7 @@ function ct_prepare {
     [ ! $? -eq 0 ] && echo "Snapshot failure. Exiting..." && exit 1
 
     echo "Stopping mail services..."
-    vzctl exec 'systemctl stop postfix dovecot'
+    vzctl exec $CTID 'systemctl stop postfix dovecot'
 
     echo "Switching all domains on PHP versions older than 7.1 to version 7.1..."
     vzctl exec2 $CTID '
