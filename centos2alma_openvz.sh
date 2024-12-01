@@ -217,7 +217,7 @@ gpgcheck=1
     vzctl exec $CTID 'grep "Enterprise Linux 7" /etc/yum.repos.d/epel.repo >/dev/null && mv /etc/yum.repos.d/epel.repo /etc/yum.repos.d/epel.repo.old && mv /etc/yum.repos.d/epel.repo.rpmnew /etc/yum.repos.d/epel.repo'
 
     echo "Reinstalling necessary packages..."
-    vzctl exec $CTID yum -y install python3 perl-Net-Patricia
+    vzctl exec $CTID yum -y install python3 perl-Net-Patricia perl-Razor-Agent
     vzctl exec $CTID yum -y update
 
     [ ! $? -eq 0 ] && echo "Yum failure - Exiting..." && exit 1
