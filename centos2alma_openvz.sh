@@ -213,7 +213,10 @@ gpgcheck=1
     vzctl exec $CTID 'rm -f /etc/yum.repos.d/plesk-migrator.repo'
 
     # Should replace Tuxcare BIND packages with those in AL8 repo
-    vzctl exec $CTID 'yum -y reinstall bind*'
+    vzctl exec $CTID 'yum -y remove bind*'
+    vzctl exec $CTID 'yum -y install bind'
+
+    vzctl exec $CTID 'yum -y remove libargon2 libgs'
 
     echo "Repairing epel repo..."
     vzctl exec $CTID 'grep "Enterprise Linux 7" /etc/yum.repos.d/epel.repo >/dev/null && mv /etc/yum.repos.d/epel.repo /etc/yum.repos.d/epel.repo.old && mv /etc/yum.repos.d/epel.repo.rpmnew /etc/yum.repos.d/epel.repo'
