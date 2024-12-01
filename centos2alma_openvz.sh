@@ -33,17 +33,25 @@ function install_almaconvert {
         [ ! $? -eq 0 ] && echo "Unable to install vzdeploy8 / almaconvert8 packages. Exiting..." && exit 1
     fi
 
-    if [ ! -f "$AC_BIN" ]; then
-        echo "Creating modified version of almaconvert8 to ignore Plesk blocker checks..."
-        cp /usr/bin/almaconvert8 $AC_BIN
-        sed -i -e "s/BLOCKER_PKGS = {'plesk': 'Plesk', 'cpanel': 'cPanel'}/BLOCKER_PKGS = {'cpanel': 'cPanel'}/g"  $AC_BIN
-    else 
-        # Line 52 is the one we changed purposefully. Anything else and we probably have a new version of almaconvert8
-        if cmp /usr/bin/almaconvert8 $AC_BIN | grep -v 'line 52'; then
-            cat /usr/bin/almaconvert8 > $AC_BIN
-            sed -i -e "s/BLOCKER_PKGS = {'plesk': 'Plesk', 'cpanel': 'cPanel'}/BLOCKER_PKGS = {'cpanel': 'cPanel'}/g"  $AC_BIN
+    vzdeploy8version=$(rpm -q vzdeploy8)
+
+    # If our modified version already exists AND it's the most recent version of vzdeploy8, we're good to go
+    if [ -f "$AC_BIN" ]; then
+        if grep "$vzdeploy8version" $AC_BIN; then
+            echo "Already using latest version of vzdeploy/almaconvert8! Continuing..."
+            return 0
         fi
     fi
+
+    # If our modified version doesn't exist OR it's older, create anew.
+    echo "Creating modified version of almaconvert8..."
+    cat /usr/bin/almaconvert8 > $AC_BIN
+    # Version it
+    sed -i "2i # $vzdeploy8version" $AC_BIN
+    # Remove Plesk from blocked packages
+    sed -i -e "s/BLOCKER_PKGS = {'plesk': 'Plesk', 'cpanel': 'cPanel'}/BLOCKER_PKGS = {'cpanel': 'cPanel'}/g"  $AC_BIN
+    # Always return an empty array in get_open_ports function because lsof's return value can break the whole conversion unnecessarily
+    sed -i '/def get_open_ports/a \ \ \ \ return []' $AC_BIN
 
 }
 
