@@ -108,6 +108,8 @@ function ct_prepare {
     vzctl exec $CTID rpm -e MariaDB-server MariaDB-client MariaDB-shared MariaDB-common MariaDB-compat --nodeps
     vzctl exec $CTID rpm -e python36-PyYAML --nodeps
     vzctl exec $CTID rpm -e fail2ban --nodeps
+    vzctl exec $CTID rpm -e file-devel --nodeps
+    vzctl exec $CTID rpm -e libgs-devel --nodeps
     # Plesk fail2ban dependencies:
     vzctl exec $CTID rpm -e python-inotify --nodeps
     vzctl exec $CTID rpm -e python2-inotify --nodeps
