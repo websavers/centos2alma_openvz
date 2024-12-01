@@ -55,16 +55,17 @@ such licenses, whether through Plesk or TuxCare/CloudLinux directly. Note: in ou
 
 ### Old Packages
 
-You may also wish to remove old centos7 packages within the container. Here's some we found:
+You may also wish to remove old centos7 packages within the container. This is totally optional. If you don't remove them, everything could work fine still, or it could result in package update conflicts with future updates.
+
+- You can run the following to see ones you have installed still: `rpm -qa | grep el7`
+- The following will show you possible replacement packages in the AlmaLinux 8 repositories: `yum list <package_name> --showduplicates`
+- You can then either remove it or install the precise version you want (from correct repo) with this: `yum install <package_name>-<version>`
+- If you want to be certain a package can be removed because it has no dependencies, rum `rpm -e <package_name>` and it will remove it if nothing depends on it.
+
+Here's an example of removal of some we found that had no dependencies for us, but might for you:
 ```
 yum remove python-inotify python-dateutil pyxattr pyparsing alt-nghttp2 yum-metadata-parser python-gobject-base python-kitchen python-ply mozjs17 python-pycurl python-urlgrabber dbus-python python-iniparse python-enum34 python-decorator python-IPy pyliblzma pygpgme nginx-filesystem
 ```
-
-You can run the following to see ones you have installed still:
-```
-rpm -qa | grep el7
-```
-Note: anything that says el7_9 is used in versions 7 through 9 and should probably remain
 
 ### Using SolusVM?
 
