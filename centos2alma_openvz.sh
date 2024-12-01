@@ -124,6 +124,11 @@ function ct_convert {
         echo "rpm shows plesk-* packages are still installed. You likely need to run --prepare still. Exiting..." && exit 1;
     fi
 
+    # When ports are in use, lsof seems to return 1 for totally unknown reasons, and that breaks almaconvert8's port reporting
+    # So to work around this we kill any daemons that might still be using ports. This is a primitive version for now.
+    echo "Stopping daemons that may still be using ports..."
+    vzctl exec $CTID systemctl stop grafana-server sshd
+
     $AC_BIN convert $CTID --log /root/almaconvert8-$CTID.log
     [ ! $? -eq 0 ] && echo "Failure running almaconvert8 - Exiting... to try again from here, use --convert and --finish options" && exit 1
     echo ""
