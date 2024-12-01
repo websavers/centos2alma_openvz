@@ -312,7 +312,7 @@ gpgcheck=1
     # If using Plesk Firewall
     if [[ $(vzctl exec $CTID 'grep -q "psa-firewall" /root/centos2alma/plesk_components') ]]; then
         vzctl exec $CTID 'yum -y remove firewalld'
-        echo "Please check that Plesk Firewall is currently active."
+        echo "WARNING: Please check that Plesk Firewall is currently active from Plesk UI."
     fi
 
     # Since Plesk enables this on new installs and it's better for security, enable it now
