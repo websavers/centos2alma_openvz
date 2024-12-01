@@ -204,8 +204,9 @@ gpgcheck=1
     echo "Change Plesk repos from CentOS 7 to EL8"
     vzctl exec $CTID sed -i -e 's/CentOS-7/RedHat-el8/g' /etc/yum.repos.d/plesk*
 
-    echo "Removing TuxCare Repos (if utilized)"
+    echo "Removing TuxCare and Plesk Migrator Repos (if utilized)"
     vzctl exec $CTID 'rm -f /etc/yum.repos.d/centos7-els*'
+    vzctl exec $CTID 'rm -f /etc/yum.repos.d/plesk-migrator.repo'
 
     # Should replace Tuxcare BIND packages with those in AL8 repo
     vzctl exec $CTID 'yum -y reinstall bind*'
