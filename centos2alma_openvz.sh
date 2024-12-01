@@ -387,7 +387,9 @@ done
 # Install and modify necessary utilities
 install_almaconvert
 
-read -p "The following process will convert CTID $CTID to AlmaLinux 8 (destructive changes). Are you sure you're ready to proceed? (y/n) " -n 1 -r
+CT_HOSTNAME=$(vzctl exec $CTID hostname)
+
+read -p "The following process will convert CTID $CTID with hostname $CT_HOSTNAME to AlmaLinux 8 (destructive changes). Are you sure you're ready to proceed? (y/n) " -n 1 -r
 echo
 if ! [[ $REPLY =~ ^[Yy]$ ]] ; then
     exit
