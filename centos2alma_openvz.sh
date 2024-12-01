@@ -253,7 +253,7 @@ gpgcheck=1
     echo "Reinstalling Plesk components..."
     vzctl exec $CTID 'plesk installer install-all-updates'
     vzctl exec $CTID 'plesk installer add --components `cat /root/centos2alma/plesk_components | grep -v -E "(config-troubleshooter|php5\.6|php7\.0)"` --debug'
-    #vzctl exec $CTID 'plesk installer add --components roundcube modsecurity nginx bind postfix dovecot resctrl php7.4 php8.0 php8.1 php8.2 php8.3'
+    vzctl exec $CTID 'plesk installer add --components php8.1 php8.2 php8.3'
 
     echo "Fixing phpMyAdmin..."
     # https://www.plesk.com/kb/support/plesk-repair-installation-shows-warning-phpmyadmin-was-configured-without-configuration-storage-in-database/
