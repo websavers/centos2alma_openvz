@@ -213,8 +213,7 @@ gpgcheck=1
     vzctl exec $CTID 'rm -f /etc/yum.repos.d/plesk-migrator.repo'
 
     # Should replace Tuxcare BIND packages with those in AL8 repo
-    vzctl exec $CTID 'yum -y remove bind*'
-    vzctl exec $CTID 'yum -y install bind'
+    vzctl exec $CTID 'yum -y install bind-9.11.36'
 
     # Remi repo conflicts with Plesk reinstall
     vzctl exec $CTID 'yum -y remove libargon2 libgs'
