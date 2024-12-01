@@ -216,6 +216,7 @@ gpgcheck=1
     vzctl exec $CTID 'yum -y remove bind*'
     vzctl exec $CTID 'yum -y install bind'
 
+    # Remi repo conflicts with Plesk reinstall
     vzctl exec $CTID 'yum -y remove libargon2 libgs'
 
     echo "Repairing epel repo..."
