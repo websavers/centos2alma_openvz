@@ -46,6 +46,7 @@ function install_almaconvert {
     # If our modified version doesn't exist OR it's older, create anew.
     echo "Creating modified version of almaconvert8..."
     cat /usr/bin/almaconvert8 > $AC_BIN
+    chmod u+x $AC_BIN
     # Version it
     sed -i "2i # $vzdeploy8version" $AC_BIN
     # Remove Plesk from blocked packages
