@@ -129,6 +129,17 @@ function ct_prepare {
     vzctl exec $CTID rpm -e file-devel --nodeps
     vzctl exec $CTID rpm -e libgs-devel --nodeps
 
+    # Convert fails when there's a broken symlink to templates, so remove it ahead of time
+    TEMPLATES_PATH=/vz/private/$CTID/templates
+    if [ -L ${TEMPLATES_PATH} ] ; then
+        if [ -e ${TEMPLATES_PATH} ] ; then
+            echo "CT Templates symlink exists, ok to proceed normally"
+        else
+            echo "CT Templates symlink broken, removing it so almaconvert8 can create it properly..."
+            rm -f ${TEMPLATES_PATH}
+        fi
+    fi
+
 }
 
 function ct_convert {
