@@ -1,6 +1,17 @@
 # Requirements
 
-**PHP 7.1+**: This script will switch any sites using PHP earlier than 7.1 to PHP 7.1 (which is required for AlmaLinux 8), however the reliability of that switch hasn't been confirmed. We recommend switching the sites manually prior to conversion so you can check to ensure the sites are compatible. If you're using 3rd party PHP versions of 7.0 or lower, you'll likely need to reinstall those after, then switch the sites back manually.
+**PHP 7.1+**: This script will switch any sites using PHP earlier than 7.1 to PHP 7.1 (which is required for AlmaLinux 8), however the reliability of that switch hasn't been confirmed. 
+
+It is *strongly* recommended that you manually switch all sites to PHP version 7.1 or newer prior to conversion so you can check to ensure the sites are compatible. If you're using 3rd party PHP versions of 7.0 or lower, you'll likely need to reinstall those after, then switch the sites back manually.
+
+We also strongly recommend ensuring that php handlers are working smoothly prior to conversion with these commands:
+
+```
+plesk repair web -php-handlers
+plesk repair web -php-fpm-configuration
+```
+
+If issues are encountered with PHP handlers in the --finish stage, it can supremely mess with plesk repairs.
 
 **OpenVZ 7.0.21+**: We have tested and confirmed the conversion process works with:
 - OpenVZ 7.0.21 (Virtuozzo Hybrid Server 7.5 Update 6 Hotfix 1 - Version 7.5.6-112)
@@ -128,6 +139,15 @@ Germany is likely blocked by your firewall rules.
 This means the container does not use a newer UUID CTID *and* the NAME of the container does not match the CTID. When at least one of either the UUID (longer CTIDs) or the NAME (shorter CTIDs, often resulting from a conversion from OpenVZ 6) do not match up with the CTID you've provided, prlctl fails to work on the container, which makes almaconvert8 fail since it relies upon it. To fix it run this (setting $CTID to the CTID):
 
 `vzctl set $CTID --name=$CTID --save`
+
+### nginx refuses to start after conversion
+
+Reinstall the nginx plesk component like this within the container:
+```
+plesk installer remove --components nginx
+plesk installer add --components nginx
+```
+You may then also need to enable it with this: `plesk sbin nginxmng --enable`
 
 ### General Troubleshooting
 
