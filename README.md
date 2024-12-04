@@ -12,6 +12,8 @@
 
 Any version of OpenVZ or Virtuozzo older than what's noted above is not likely to work. You should update all packages on both the node and the container prior to conversion. 
 
+**TOMCAT NOTE**: if you use tomcat, it will be removed prior to conversion because it breaks the conversion process. You will need to manually re-install it after conversion and will probably need to restore its configuration files.
+
 # Usage
 
 Check to be sure the container is recognized as convertible by almaconvert8:
