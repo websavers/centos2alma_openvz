@@ -337,8 +337,8 @@ gpgcheck=1
     fi
 
     # Since Plesk enables this on new installs and it's better for security, enable it now
-    echo "Enabling apache listen only on localhost mode..."
-    vzctl exec $CTID 'plesk bin apache --listen-on-localhost true'
+    #echo "Enabling apache listen only on localhost mode..."
+    #vzctl exec $CTID 'plesk bin apache --listen-on-localhost true'
 
     echo "Starting Grafana Server..."
     vzctl exec $CTID systemctl start grafana-server
