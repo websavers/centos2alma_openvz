@@ -382,6 +382,14 @@ function ct_check {
 
     echo "Note: part of the 'almaconvert8 list' command is just looking to see if the template name ends with centos-7-x86_64 or centos-7. If this fails, try changing the template name in the CT config file (/vz/private/$CTID/ve.conf) to match that pattern."
 
+    netfilter=$(grep "NETFILTER" /vz/private/$CTID/ve.conf)
+    if [[ -z "$netfilter" ]]; then # empty
+        echo "Warning: NETFILTER not set for $CTID - this could result in firewall/iptables issues"
+    fi
+    if [[ "$netfilter" != *"full"* ]]; then
+        echo "Warning: NETFILTER not set to 'full' for $CTID - this could result in firewall/iptables issues"
+    fi
+
 }
 
 #### STANDARD PROCESSING BEGINS HERE ####
