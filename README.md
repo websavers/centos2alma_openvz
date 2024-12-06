@@ -128,6 +128,10 @@ Once you have confirmed the container is back to the original state, delete the 
 
 # Troubleshooting Tips
 
+### Initial snapshot error and exit
+
+Most snapshot errors can be resolved by restarting the container via vzctl.
+
 ### If the almalinux GPG key fails to download
 
 Germany is likely blocked by your firewall rules.
