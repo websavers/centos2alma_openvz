@@ -69,7 +69,7 @@ function reinstall_mariadb {
         vzctl exec $CTID mv /etc/my.cnf /etc/my.cnf.rpmnew
         vzctl exec $CTID mv /etc/my.cnf.rpmsave /etc/my.cnf
         # Comment out bind-address to prevent issues with older configs
-        vzctl exec $CTID sed -i 's/^bind-address/#&/' /etc/my.cnf
+        vzctl exec $CTID 'sed -i "s/^bind-address/#&/" /etc/my.cnf'
     fi
 
     vzctl exec $CTID systemctl restart mariadb
