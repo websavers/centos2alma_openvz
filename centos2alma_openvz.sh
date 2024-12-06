@@ -298,9 +298,7 @@ gpgcheck=1
     vzctl exec $CTID '[ -f "/etc/httpd/conf.d/security2.conf.rpmsave" ] && cp -f /etc/httpd/conf.d/security2.conf.rpmsave /etc/httpd/conf.d/security2.conf'
     vzctl exec $CTID 'plesk sbin nginxmng -e'
 
-    echo "Reparing php-fpm handlers and Restoring PHP configs"
-    vzctl exec $CTID 'plesk repair web -y -php-handlers'
-
+    echo "Restoring PHP configs"
     vzctl exec $CTID '
     PHP_VERSIONS="7.0 7.1 7.2 7.3 7.4 8.0 8.1 8.2 8.3"
     for ver in $PHP_VERSIONS; do
@@ -313,11 +311,16 @@ gpgcheck=1
         systemctl restart plesk-php$handler_ver-fpm
     done'
 
-    echo "Running Plesk Repair..."
+    echo "Running Full Plesk Repairs..."
     vzctl exec $CTID 'plesk repair installation'
+
+    echo "Running Plesk FS Repairs..."
     vzctl exec $CTID 'plesk repair fs -y'
+
+    echo "Running php-fpm handlers Repairs..."
+    vzctl exec $CTID 'plesk repair web -y -php-handlers'
     
-    echo "Reenabling Mod_Security / WAF..."
+    echo "Enable Mod_Security / WAF..."
     vzctl exec $CTID plesk bin server_pref --update-web-app-firewall -waf-rule-engine on
 
     # If using Installatron
