@@ -323,16 +323,6 @@ gpgcheck=1
     echo "Enable Mod_Security / WAF..."
     vzctl exec $CTID plesk bin server_pref --update-web-app-firewall -waf-rule-engine on
 
-    # If using Installatron
-    vzctl exec $CTID 'if [ -f "/usr/local/installatron/repair" ]; then
-    cd /usr/local/installatron/bin
-    mv run run.bak
-    mv php php.bak
-    ln -s /opt/plesk/php/8.1/bin/php run
-    ln -s /opt/plesk/php/8.1/bin/php php
-    /usr/local/installatron/repair -f --quick
-    fi'
-
     # If using Imunify360
     if [[ $(vzctl exec $CTID 'systemctl | grep imunify360') ]]; then
         echo "Repairing Imunify360..."
@@ -350,9 +340,21 @@ gpgcheck=1
     echo "Enabling apache listen only on localhost mode..."
     vzctl exec $CTID 'plesk bin apache --listen-on-localhost true'
 
+    echo "Starting Grafana Server..."
+    vzctl exec $CTID systemctl start grafana-server
+
+    # If using Installatron
+    vzctl exec $CTID 'if [ -f "/usr/local/installatron/repair" ]; then
+    cd /usr/local/installatron/bin
+    mv run run.bak
+    mv php php.bak
+    ln -s /opt/plesk/php/8.1/bin/php run
+    ln -s /opt/plesk/php/8.1/bin/php php
+    /usr/local/installatron/repair -f --quick
+    fi'
+
     echo "Cleaning up..."
     vzctl exec $CTID 'rm -f /etc/yum.repos.d/plesk-base-tmp.repo'
-    vzctl exec $CTID systemctl start grafana-server
 
 }
 
