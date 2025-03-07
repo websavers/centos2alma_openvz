@@ -235,9 +235,11 @@ gpgcheck=1
     vzctl exec $CTID 'rm -f /etc/yum.repos.d/centos7-els*'
     vzctl exec $CTID 'rm -f /etc/yum.repos.d/plesk-migrator.repo'
 
-    # I don't know why almaconvert8 now reinstalls the vzlinux-release package as part of POST_UPGRADE_ADD_PKGS
+    # In almaconvert8 they have vzlinux-release included in POST_UPGRADE_ADD_PKGS
+    # I think their intention was to install that after conversion from CentOS 7 to vzlinux 7
+    # But now it reinstalls that package after upgrade to almalinux8, which is not great for 
+    # anything that detects the OS that way, like the MariaDB installer.
     # So let's override that with the right release package
-    # This is needed for other packages to install, specifically MariaDB
     vzctl exec $CTID yum -y install almalinux-release
 
     # Should replace Tuxcare BIND packages with those in AL8 repo
