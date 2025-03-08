@@ -162,8 +162,26 @@ function ct_convert {
 # Changes to the container only via vzctl commands
 function ct_finish {
 
+    # Detect when almaconvert8 has screwed up royally by failing to install almalinux packages and attempt repair
     vzctl exec2 $CTID 'grep -q "AlmaLinux release" /etc/redhat-release'
-    [ ! $? -eq 0 ] &&  echo "AlmaLinux not detected. Conversion must not have completed. If you can fix the conversion, you can then resume by running ./centos2alma_openvz.sh <CTID> --finish" && exit 1
+    if [ ! $? -eq 0 ]; then
+        echo "AlmaLinux not found. Virtuozzo conversion failed and didn't tell us. Attempting to fix it..."
+        vzctl exec2 $CTID 'grep -q "Virtuozzo" /etc/redhat-release'
+        if [ $? -eq 0 ]; then
+            vzctl exec $CTID rpm -e vzlinux-release --nodeps
+            vzctl exec $CTID rpm -Uvh http://mirror.its.dal.ca/almalinux/8.10/BaseOS/x86_64/os/Packages/almalinux-release-8.10-1.el8.x86_64.rpm
+            vzctl exec $CTID yum -y update
+            # Swap all vl8 packages for al8 packages
+            vzctl exec $CTID yum -y distro-sync --disablerepo=epel
+
+            vzctl exec2 $CTID 'grep -q "AlmaLinux release" /etc/redhat-release'
+            if [ ! $? -eq 0 ]; then
+                echo "Repair attempt failed. Exiting... " && exit 1
+            else
+                echo "Repair completed - AlmaLinux detected! Continuing..."
+            fi
+        fi
+    fi
 
     vzctl exec $CTID systemctl stop grafana-server firewalld
 
