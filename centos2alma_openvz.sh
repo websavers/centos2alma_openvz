@@ -24,14 +24,10 @@ CTID=$(vzlist $CTID -H -o ctid | awk '{print $1}')
 # Changes to node packages
 function install_almaconvert { 
 
-    if rpm -q --quiet vzdeploy8 ; then 
-        #echo "Already have vzdeploy8. Skipping install..."
-        echo ""
-    else
-        echo "Installing vzdeploy8 / almaconvert8 packages on local node..."
-        yum install vzdeploy8 -y
-        [ ! $? -eq 0 ] && echo "Unable to install vzdeploy8 / almaconvert8 packages. Exiting..." && exit 1
-    fi
+    echo "Installing latest vzdeploy8 / almaconvert8 packages on local node..."
+    #yum -y install vzdeploy8
+    yum -y install  https://repo.virtuozzo.com/vzlinux/vzdeploy/vzdeploy8.rpm
+    #[ ! $? -eq 0 ] && echo "Unable to install vzdeploy8 / almaconvert8 packages. Exiting..." && exit 1
 
     vzdeploy8version=$(rpm -q vzdeploy8)
 
