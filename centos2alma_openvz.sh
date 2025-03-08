@@ -162,6 +162,9 @@ function ct_convert {
 # Changes to the container only via vzctl commands
 function ct_finish {
 
+    vzctl exec2 $CTID 'grep -q "AlmaLinux release" /etc/redhat-release'
+    [ ! $? -eq 0 ] &&  echo "AlmaLinux not detected. Conversion must not have completed. If you can fix the conversion, you can then resume by running ./centos2alma_openvz.sh <CTID> --finish" && exit 1
+
     vzctl exec $CTID systemctl stop grafana-server firewalld
 
     echo "Replacing plesk.repo with version without PHP 5.x"
@@ -236,7 +239,7 @@ gpgcheck=1
     # But now it reinstalls that package after upgrade to almalinux8, which is not great for 
     # anything that detects the OS that way, like the MariaDB installer.
     # So let's override that with the right release package
-    vzctl exec $CTID yum -y install almalinux-release
+    #vzctl exec $CTID yum -y install almalinux-release
 
     # Should replace Tuxcare BIND packages with those in AL8 repo
     vzctl exec $CTID 'yum -y install bind-9.11.36'
