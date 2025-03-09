@@ -471,4 +471,5 @@ function ct_check {
 
 }
 
-main()
+# call function main
+main
