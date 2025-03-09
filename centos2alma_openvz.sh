@@ -199,6 +199,10 @@ function ct_prepare {
         fi
     fi
 
+    echo "Prepare phase completed."
+    echo "========================"
+    echo ""
+
 }
 
 function ct_convert {
@@ -214,8 +218,6 @@ function ct_convert {
 
     $AC_BIN convert $CTID --log /root/almaconvert8-$CTID.log
     [ ! $? -eq 0 ] && echo "Failure running almaconvert8 - Exiting... to try again from here, use --convert and --finish options" && exit 1
-    echo ""
-    echo ""
 
     # Detect when almaconvert8 has screwed up royally by failing to install almalinux packages and attempt repair
     vzctl exec2 $CTID 'grep -q "AlmaLinux release" /etc/redhat-release'
@@ -237,6 +239,10 @@ function ct_convert {
             fi
         fi
     fi
+
+    echo "Convert phase completed."
+    echo "========================"
+    echo ""
 
 }
 
@@ -439,6 +445,10 @@ gpgcheck=1
 
     echo "Cleaning up..."
     vzctl exec $CTID 'rm -f /etc/yum.repos.d/plesk-base-tmp.repo'
+
+    echo "Finish phase completed."
+    echo "========================"
+    echo ""
 
 }
 
