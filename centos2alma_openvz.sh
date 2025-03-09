@@ -114,7 +114,7 @@ function reinstall_mariadb {
         vzctl exec $CTID bash mariadb_repo_setup --mariadb-server-version=10.11
     fi 
 
-    vzctl exec $CTID yum -y install boost-program-options MariaDB-server MariaDB-client MariaDB-shared
+    vzctl exec $CTID 'yum -y install boost-program-options MariaDB-server MariaDB-client MariaDB-shared'
     vzctl exec $CTID 'yum -y update MariaDB-server MariaDB-client MariaDB-shared MariaDB-*'
 
     # Restore original config
