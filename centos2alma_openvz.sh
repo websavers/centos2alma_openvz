@@ -19,7 +19,62 @@ vzlist $CTID >/dev/null
 # Even if the NAME value was provided rather than CTID, this ensures the CTID is used from now on
 CTID=$(vzlist $CTID -H -o ctid | awk '{print $1}')
 
-###### FUNCTIONS BEGIN HERE ######
+function main {
+
+    while test $# -gt 0
+    do
+        case "$1" in
+            --prepare) echo "Prepare parameter provided. Running only pre-conversion (destructive) changes..."
+                ct_prepare
+                exit 0
+                ;;
+            --convert) echo "Convert parameter provided. Running only conversion (destructive) changes..."
+                ct_convert
+                exit 0
+                ;;
+            --finish) echo "Finish parameter provided. Running only post-conversion repairs..."
+                ct_finish
+                exit 0
+                ;;
+            --revert) echo "Revert parameter provided. Doing reversion to CentOS7 snapshot..."
+                ct_revert
+                exit 0
+                ;;
+            --check) echo "Check parameter provided. Checking if container can be converted..."
+                ct_check
+                exit 0
+                ;;
+            #--*) echo "bad option $1"
+            #    ;;
+            #*) echo "argument $1"
+            #    ;;
+        esac
+        shift
+    done
+
+    # Install and modify necessary utilities
+    install_almaconvert
+
+    CT_HOSTNAME=$(vzctl exec $CTID hostname)
+
+    read -p "The following process will convert CTID $CTID with hostname $CT_HOSTNAME to AlmaLinux 8 (destructive changes). Are you sure you're ready to proceed? (y/n) " -n 1 -r
+    echo
+    if ! [[ $REPLY =~ ^[Yy]$ ]] ; then
+        exit
+    fi
+
+    echo "STAGE 1: Preparing container for conversion..."
+    ct_prepare
+
+    echo "STAGE 2: Conversion begins using almaconvert8. Do not interrupt unless failure reported."
+    ct_convert
+
+    echo "STAGE 3: Post-Conversion Repairs..."
+    ct_finish
+
+    echo "Conversion completed!"
+
+}
 
 # Changes to node packages
 function install_almaconvert { 
@@ -416,57 +471,4 @@ function ct_check {
 
 }
 
-#### STANDARD PROCESSING BEGINS HERE ####
-
-while test $# -gt 0
-do
-    case "$1" in
-         --prepare) echo "Prepare parameter provided. Running only pre-conversion (destructive) changes..."
-            ct_prepare
-            exit 0
-            ;;
-         --convert) echo "Convert parameter provided. Running only conversion (destructive) changes..."
-            ct_convert
-            exit 0
-            ;;
-        --finish) echo "Finish parameter provided. Running only post-conversion repairs..."
-            ct_finish
-            exit 0
-            ;;
-        --revert) echo "Revert parameter provided. Doing reversion to CentOS7 snapshot..."
-            ct_revert
-            exit 0
-            ;;
-        --check) echo "Check parameter provided. Checking if container can be converted..."
-            ct_check
-            exit 0
-            ;;
-        #--*) echo "bad option $1"
-        #    ;;
-        #*) echo "argument $1"
-        #    ;;
-    esac
-    shift
-done
-
-# Install and modify necessary utilities
-install_almaconvert
-
-CT_HOSTNAME=$(vzctl exec $CTID hostname)
-
-read -p "The following process will convert CTID $CTID with hostname $CT_HOSTNAME to AlmaLinux 8 (destructive changes). Are you sure you're ready to proceed? (y/n) " -n 1 -r
-echo
-if ! [[ $REPLY =~ ^[Yy]$ ]] ; then
-    exit
-fi
-
-echo "STAGE 1: Preparing container for conversion..."
-ct_prepare
-
-echo "STAGE 2: Conversion begins using almaconvert8. Do not interrupt unless failure reported."
-ct_convert
-
-echo "STAGE 3: Post-Conversion Repairs..."
-ct_finish
-
-echo "Conversion completed!"
+main()
