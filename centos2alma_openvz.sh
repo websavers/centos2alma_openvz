@@ -123,8 +123,11 @@ function reinstall_mariadb {
         vzctl exec $CTID 'sed -i "s/^bind-address/#&/" /etc/my.cnf'
     fi
 
-    vzctl exec $CTID systemctl restart mariadb
-    [ ! $? -eq 0 ] && echo "Error starting MariaDB. Exiting..." && exit 1
+    echo "Restarting MariaDB..."
+    vzctl exec2 $CTID systemctl restart mariadb
+    sleep 30s
+    vzctl exec2 $CTID systemctl status mariadb
+    [ ! $? -eq 0 ] && echo "MariaDB daemon not running. Exiting..." && exit 1
 }
 
 function ct_prepare {
@@ -377,7 +380,7 @@ gpgcheck=1
     vzctl exec $CTID 'plesk installer add --components nginx'
     vzctl exec $CTID '[ -f "/etc/nginx/nginx.conf.rpmsave" ] && mv -f /etc/nginx/nginx.conf /etc/nginx/nginx.conf.new && cp /etc/nginx/nginx.conf.rpmsave /etc/nginx/nginx.conf'
     vzctl exec $CTID '[ -f "/etc/httpd/conf.d/security2.conf.rpmsave" ] && cp -f /etc/httpd/conf.d/security2.conf.rpmsave /etc/httpd/conf.d/security2.conf'
-    vzctl exec $CTID 'plesk sbin nginxmng -e'
+    vzctl exec $CTID 'plesk sbin nginxmng --disable && plesk sbin nginxmng --enable'
 
     echo "Restoring PHP configs"
     vzctl exec $CTID '
