@@ -168,6 +168,8 @@ function ct_prepare {
     vzctl exec $CTID rpm -e openssl11-libs --nodeps
     vzctl exec $CTID rpm -e psa-mod_proxy --nodeps
     vzctl exec $CTID rpm -e MariaDB-server MariaDB-client MariaDB-shared MariaDB-common MariaDB-compat --nodeps
+    # Old/stock verisons of mariadb
+    vzctl exec $CTID yum -y remove mariadb-server mariadb-client mariadb-shared mariadb-common mariadb-compat mariadb-gssapi-server mariadb-connector-c mariadb-connector-c-config
     vzctl exec $CTID rpm -e python36-PyYAML --nodeps
     vzctl exec $CTID rpm -e fail2ban --nodeps
     vzctl exec $CTID yum -y remove "tomcat-*"
@@ -472,4 +474,4 @@ function ct_check {
 }
 
 # call function main
-main
+main $@
