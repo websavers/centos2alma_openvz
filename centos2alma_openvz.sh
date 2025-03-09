@@ -9,7 +9,7 @@ SNAPSHOT_NAME=CentOS7PleskBase
 
 # Check OS
 source /etc/os-release
-[ "$NAME" != "Virtuozzo" ] && echo "This must be run on an OpenVZ node, not within the container. Exiting..." && exit 1
+[[ ${PRETTY_NAME} != *"OpenVZ"* ]] && echo "This must be run on an OpenVZ node, not within the container. Exiting..." && exit 1
 
 # Verify CTID
 [ "$CTID" = "" ] && echo "The CTID paramter has NOT been provided. Exiting..." && exit 1
