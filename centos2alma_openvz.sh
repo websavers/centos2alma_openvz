@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Version 2.4
+# Version 2.5
 # Usage: ./centos2alma_openvz.sh <CTID>
 
 CTID=$1
@@ -212,11 +212,6 @@ function ct_convert {
     echo ""
     echo ""
 
-}
-
-# Changes to the container only via vzctl commands
-function ct_finish {
-
     # Detect when almaconvert8 has screwed up royally by failing to install almalinux packages and attempt repair
     vzctl exec2 $CTID 'grep -q "AlmaLinux release" /etc/redhat-release'
     if [ ! $? -eq 0 ]; then
@@ -237,6 +232,11 @@ function ct_finish {
             fi
         fi
     fi
+
+}
+
+# Changes to the container only via vzctl commands
+function ct_finish {
 
     vzctl exec $CTID systemctl stop grafana-server firewalld
 
