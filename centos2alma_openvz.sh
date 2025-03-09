@@ -424,7 +424,7 @@ gpgcheck=1
     #echo "Enabling apache listen only on localhost mode..."
     #vzctl exec $CTID 'plesk bin apache --listen-on-localhost true'
 
-    echo "Starting Grafana Server..."
+    echo "Starting Grafana Server, if previously installed..."
     vzctl exec $CTID systemctl start grafana-server
 
     # If using Installatron
