@@ -109,8 +109,10 @@ function install_almaconvert {
 
 # Changes to the container only via vzctl commands
 function reinstall_mariadb {
-    vzctl exec $CTID curl -LsS -O https://downloads.mariadb.com/MariaDB/mariadb_repo_setup
-    vzctl exec $CTID bash mariadb_repo_setup --mariadb-server-version=10.11
+    if ! vzctl exec2 $CTID 'grep "10.11" /etc/yum.repos.d/mariadb.repo'; then
+        vzctl exec $CTID curl -LsS -O https://downloads.mariadb.com/MariaDB/mariadb_repo_setup
+        vzctl exec $CTID bash mariadb_repo_setup --mariadb-server-version=10.11
+    fi 
 
     vzctl exec $CTID yum -y install boost-program-options MariaDB-server MariaDB-client MariaDB-shared
     vzctl exec $CTID 'yum -y update MariaDB-server MariaDB-client MariaDB-shared MariaDB-*'
@@ -119,14 +121,12 @@ function reinstall_mariadb {
     if [ -f "/vz/root/$CTID/etc/my.cnf.rpmsave" ]; then
         vzctl exec $CTID mv /etc/my.cnf /etc/my.cnf.rpmnew
         vzctl exec $CTID mv /etc/my.cnf.rpmsave /etc/my.cnf
-        # Comment out bind-address to prevent issues with older configs
-        vzctl exec $CTID 'sed -i "s/^bind-address/#&/" /etc/my.cnf'
     fi
+    # Fix bind-address syntax (now comma separated with 10.11)
+    vzctl exec $CTID 'sed -i "/^bind-address/s/::ffff:127.0.0.1/::ffff,127.0.0.1/" /etc/my.cnf'
 
     echo "Restarting MariaDB..."
     vzctl exec2 $CTID systemctl restart mariadb
-    sleep 30s
-    vzctl exec2 $CTID systemctl status mariadb
     [ ! $? -eq 0 ] && echo "MariaDB daemon not running. Exiting..." && exit 1
 }
 
