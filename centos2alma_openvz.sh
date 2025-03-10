@@ -435,8 +435,8 @@ gpgcheck=1
     cd /usr/local/installatron/bin
     mv run run.bak
     mv php php.bak
-    ln -s /opt/plesk/php/8.1/bin/php run
-    ln -s /opt/plesk/php/8.1/bin/php php
+    ln -s /opt/plesk/php/8.3/bin/php run
+    ln -s /opt/plesk/php/8.3/bin/php php
     /usr/local/installatron/repair -f --quick
     fi'
 
