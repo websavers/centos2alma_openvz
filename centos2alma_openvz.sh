@@ -211,11 +211,6 @@ function ct_convert {
         echo "rpm shows plesk-* packages are still installed. You likely need to run --prepare still. Exiting..." && exit 1
     fi
 
-    # When ports are in use, lsof seems to return 1 for totally unknown reasons, and that breaks almaconvert8's port reporting
-    # So to work around this we kill any daemons that might still be using ports. This is a primitive version for now.
-    #echo "Stopping daemons that may still be using ports..."
-    #vzctl exec $CTID systemctl stop grafana-server sshd
-
     $AC_BIN convert $CTID --log /root/almaconvert8-$CTID.log
     [ ! $? -eq 0 ] && echo "Failure running almaconvert8 - Exiting... to try again from here, use --convert and --finish options" && exit 1
 
@@ -227,6 +222,14 @@ function ct_convert {
         if [ $? -eq 0 ]; then
             vzctl exec $CTID rpm -e vzlinux-release --nodeps
             vzctl exec $CTID rpm -Uvh http://mirror.its.dal.ca/almalinux/8.10/BaseOS/x86_64/os/Packages/almalinux-release-8.10-1.el8.x86_64.rpm
+
+            echo "Change Plesk repos from CentOS 7 to EL8"
+            vzctl exec $CTID sed -i -e 's/CentOS-7/RedHat-el8/g' /etc/yum.repos.d/plesk*
+
+            echo "Removing TuxCare and Plesk Migrator Repos (if utilized)"
+            vzctl exec $CTID 'rm -f /etc/yum.repos.d/centos7-els*'
+            vzctl exec $CTID 'rm -f /etc/yum.repos.d/plesk-migrator.repo'
+
             vzctl exec $CTID yum -y update
             # Swap all vl8 packages for al8 packages
             vzctl exec $CTID yum -y distro-sync --disablerepo=epel
@@ -237,8 +240,19 @@ function ct_convert {
             else
                 echo "Repair completed - AlmaLinux detected! Continuing..."
             fi
+        else   
+            echo "Unable to get to AlmaLinux... exiting" && exit 1
         fi
+    else
+        echo "Change Plesk repos from CentOS 7 to EL8"
+        vzctl exec $CTID sed -i -e 's/CentOS-7/RedHat-el8/g' /etc/yum.repos.d/plesk*
+
+        echo "Removing TuxCare and Plesk Migrator Repos (if utilized)"
+        vzctl exec $CTID 'rm -f /etc/yum.repos.d/centos7-els*'
+        vzctl exec $CTID 'rm -f /etc/yum.repos.d/plesk-migrator.repo'
     fi
+
+
 
     echo "Convert phase completed."
     echo "========================"
@@ -311,19 +325,6 @@ enabled=1
 gpgcheck=1
 " > /etc/yum.repos.d/plesk.repo'
 
-    echo "Change Plesk repos from CentOS 7 to EL8"
-    vzctl exec $CTID sed -i -e 's/CentOS-7/RedHat-el8/g' /etc/yum.repos.d/plesk*
-
-    echo "Removing TuxCare and Plesk Migrator Repos (if utilized)"
-    vzctl exec $CTID 'rm -f /etc/yum.repos.d/centos7-els*'
-    vzctl exec $CTID 'rm -f /etc/yum.repos.d/plesk-migrator.repo'
-
-    # In almaconvert8 they have vzlinux-release included in POST_UPGRADE_ADD_PKGS
-    # I think their intention was to install that after conversion from CentOS 7 to vzlinux 7
-    # But now it reinstalls that package after upgrade to almalinux8, which is not great for 
-    # anything that detects the OS that way, like the MariaDB installer.
-    # So let's override that with the right release package
-    #vzctl exec $CTID yum -y install almalinux-release
 
     # Should replace Tuxcare BIND packages with those in AL8 repo
     vzctl exec $CTID 'yum -y install bind-9.11.36'
