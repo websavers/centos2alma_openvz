@@ -240,8 +240,6 @@ function ct_convert {
             else
                 echo "Repair completed - AlmaLinux detected! Continuing..."
             fi
-        else   
-            echo "Unable to get to AlmaLinux... exiting" && exit 1
         fi
     else
         echo "Change Plesk repos from CentOS 7 to EL8"
@@ -251,8 +249,6 @@ function ct_convert {
         vzctl exec $CTID 'rm -f /etc/yum.repos.d/centos7-els*'
         vzctl exec $CTID 'rm -f /etc/yum.repos.d/plesk-migrator.repo'
     fi
-
-
 
     echo "Convert phase completed."
     echo "========================"
