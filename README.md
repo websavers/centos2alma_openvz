@@ -25,6 +25,8 @@ Any version of OpenVZ or Virtuozzo older than what's noted above is not likely t
 
 **TOMCAT NOTE**: if you use tomcat, it will be removed prior to conversion because it breaks the conversion process. You will need to manually re-install it after conversion and will probably need to restore its configuration files.
 
+**DOCKER NOTE**: if you use docker-ce package, it will be removed prior to conversion. If you're using docker through Plesk, it should automatically re-install after conversion. If you were using this manually, you'll need to manually install it.
+
 # Usage
 
 Check to be sure the container is recognized as convertible by almaconvert8:

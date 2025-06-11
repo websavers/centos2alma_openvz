@@ -187,6 +187,7 @@ function ct_prepare {
     vzctl exec $CTID rpm -e xmlrpc-c xmlrpc-c-c++ --nodeps
     vzctl exec $CTID rpm -e file-devel --nodeps
     vzctl exec $CTID rpm -e libgs-devel --nodeps
+    vzctl exec $CTID rpm -e docker-ce docker-ce-rootless-extras
 
     # Convert fails when there's a broken symlink to templates, so remove it ahead of time
     TEMPLATES_PATH=/vz/private/$CTID/templates
@@ -229,6 +230,13 @@ function ct_convert {
             echo "Removing TuxCare and Plesk Migrator Repos (if utilized)"
             vzctl exec $CTID 'rm -f /etc/yum.repos.d/centos7-els*'
             vzctl exec $CTID 'rm -f /etc/yum.repos.d/plesk-migrator.repo'
+
+            # These packages mess with distro sync
+            echo "Removing incompatible devel packages with distrosync."
+            vzctl exec $CTID rpm -e lcms2-devel 
+            vzctl exec $CTID rpm -e jasper-devel 
+            vzctl exec $CTID rpm -e ilmbase-devel OpenEXR-devel
+            vzctl exec $CTID rpm -e libpcap-devel 
 
             vzctl exec $CTID yum -y update
             # Swap all vl8 packages for al8 packages
