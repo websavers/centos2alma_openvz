@@ -170,6 +170,10 @@ function ct_prepare {
     vzctl exec $CTID yum -y remove "plesk-*"
     vzctl exec $CTID rpm -e openssl11-libs --nodeps
     vzctl exec $CTID rpm -e psa-mod_proxy --nodeps
+    vzctl exec $CTID rpm -e lcms2-devel 
+    vzctl exec $CTID rpm -e jasper-devel 
+    vzctl exec $CTID rpm -e ilmbase-devel OpenEXR-devel
+    vzctl exec $CTID rpm -e libpcap-devel 
     vzctl exec $CTID rpm -e MariaDB-server MariaDB-client MariaDB-shared MariaDB-common MariaDB-compat --nodeps
     # Old/stock verisons of mariadb
     vzctl exec $CTID yum -y remove mariadb-server mariadb-client mariadb-shared mariadb-common mariadb-compat mariadb-gssapi-server mariadb-connector-c mariadb-connector-c-config
@@ -230,13 +234,6 @@ function ct_convert {
             echo "Removing TuxCare and Plesk Migrator Repos (if utilized)"
             vzctl exec $CTID 'rm -f /etc/yum.repos.d/centos7-els*'
             vzctl exec $CTID 'rm -f /etc/yum.repos.d/plesk-migrator.repo'
-
-            # These packages mess with distro sync
-            echo "Removing incompatible devel packages with distrosync."
-            vzctl exec $CTID rpm -e lcms2-devel 
-            vzctl exec $CTID rpm -e jasper-devel 
-            vzctl exec $CTID rpm -e ilmbase-devel OpenEXR-devel
-            vzctl exec $CTID rpm -e libpcap-devel 
 
             vzctl exec $CTID yum -y update
             # Swap all vl8 packages for al8 packages
@@ -332,6 +329,8 @@ enabled=1
 gpgcheck=1
 " > /etc/yum.repos.d/plesk.repo'
 
+    # If there's a plesk docker repo, update it for CentOS 8 packages
+    vzctl exec $CTID "sed -i 's#centos/7#centos/8#g' /etc/yum.repos.d/plesk.repo/plesk-ext-docker.repo"
 
     # Should replace Tuxcare BIND packages with those in AL8 repo
     vzctl exec $CTID 'yum -y install bind-9.11.36'
