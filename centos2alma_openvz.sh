@@ -396,6 +396,7 @@ gpgcheck=1
     vzctl exec $CTID '[ -f "/etc/httpd/conf.d/security2.conf.rpmsave" ] && cp -f /etc/httpd/conf.d/security2.conf.rpmsave /etc/httpd/conf.d/security2.conf'
     vzctl exec $CTID 'plesk sbin nginxmng --disable && plesk sbin nginxmng --enable'
 
+    # https://support.plesk.com/hc/en-us/articles/12377651410839-Unable-to-start-Apache-on-a-Plesk-server-AH02093-mod-watchdog-is-required
     vzctl exec $CTID 'sed -i '/mod_watchdog.so/s/^#//g' /etc/httpd/conf.modules.d/00-base.conf'
 
     echo "Restoring PHP configs. (Note: you'll likely see failed to restart errors. This is normal.)"
