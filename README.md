@@ -130,6 +130,13 @@ Once you have confirmed the container is back to the original state, delete the 
 
 # Troubleshooting Tips
 
+### Distro-Sync failure
+
+1. Look back in the output for the yum errors that prevented distro-sync from completing.
+2. Fix yum reported issues (ex: remove conflicting packages) 
+3. Re-run vzctl exec $CTID yum -y distro-sync --disablerepo=epel
+4. Run the --finish stage manually
+
 ### Initial snapshot error and exit
 
 Most snapshot errors can be resolved by restarting the container via vzctl.

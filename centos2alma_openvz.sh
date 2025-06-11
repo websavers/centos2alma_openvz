@@ -241,6 +241,9 @@ function ct_convert {
             vzctl exec $CTID yum -y update
             # Swap all vl8 packages for al8 packages
             vzctl exec $CTID yum -y distro-sync --disablerepo=epel
+            if [ ! $? -eq 0 ]; then
+                echo "Manual conversion from vzlinux8 to almalinux8 failed during distro-sync. See readme for assistance." && exit 1
+            fi
 
             vzctl exec2 $CTID 'grep -q "AlmaLinux release" /etc/redhat-release'
             if [ ! $? -eq 0 ]; then
