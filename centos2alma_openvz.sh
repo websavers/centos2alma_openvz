@@ -396,6 +396,8 @@ gpgcheck=1
     vzctl exec $CTID '[ -f "/etc/httpd/conf.d/security2.conf.rpmsave" ] && cp -f /etc/httpd/conf.d/security2.conf.rpmsave /etc/httpd/conf.d/security2.conf'
     vzctl exec $CTID 'plesk sbin nginxmng --disable && plesk sbin nginxmng --enable'
 
+    vzctl exec $CTID 'sed -i '/mod_watchdog.so/s/^#//g' /etc/httpd/conf.modules.d/00-base.conf'
+
     echo "Restoring PHP configs. (Note: you'll likely see failed to restart errors. This is normal.)"
     vzctl exec $CTID '
     PHP_VERSIONS="7.0 7.1 7.2 7.3 7.4 8.0 8.1 8.2 8.3"
