@@ -228,8 +228,9 @@ function ct_convert {
             vzctl exec $CTID rpm -e vzlinux-release --nodeps
             vzctl exec $CTID rpm -Uvh http://mirror.its.dal.ca/almalinux/8.10/BaseOS/x86_64/os/Packages/almalinux-release-8.10-1.el8.x86_64.rpm
 
-            echo "Change Plesk repos from CentOS 7 to EL8"
-            vzctl exec $CTID sed -i -e 's/CentOS-7/RedHat-el8/g' /etc/yum.repos.d/plesk*
+            echo "Disable Plesk repo (it will be recreated in the next phase) and update extension repos"
+            vzctl exec $CTID mv /etc/yum.repos.d/plesk.repo /etc/yum.repos.d/plesk.repo.old
+            vzctl exec $CTID sed -i -e 's/CentOS-7/RedHat-el8/g' /etc/yum.repos.d/plesk-*.repo
 
             echo "Removing TuxCare and Plesk Migrator Repos (if utilized)"
             vzctl exec $CTID 'rm -f /etc/yum.repos.d/centos7-els*'
@@ -250,8 +251,9 @@ function ct_convert {
             fi
         fi
     else
-        echo "Change Plesk repos from CentOS 7 to EL8"
-        vzctl exec $CTID sed -i -e 's/CentOS-7/RedHat-el8/g' /etc/yum.repos.d/plesk*
+        echo "Disable Plesk repo (it will be recreated in the next phase) and update extension repos"
+        vzctl exec $CTID mv /etc/yum.repos.d/plesk.repo /etc/yum.repos.d/plesk.repo.old
+        vzctl exec $CTID sed -i -e 's/CentOS-7/RedHat-el8/g' /etc/yum.repos.d/plesk-*.repo
 
         echo "Removing TuxCare and Plesk Migrator Repos (if utilized)"
         vzctl exec $CTID 'rm -f /etc/yum.repos.d/centos7-els*'
