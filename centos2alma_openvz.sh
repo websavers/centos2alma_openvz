@@ -90,6 +90,7 @@ function install_almaconvert {
     if [ -f "$AC_BIN" ]; then
         if grep "$vzdeploy8version" $AC_BIN; then
             echo "Already using latest version of vzdeploy/almaconvert8! Continuing..."
+            echo "----------------------------------------------"
             return 0
         fi
     fi
@@ -484,10 +485,13 @@ function ct_check {
 
     install_almaconvert
     can_convert=$($AC_BIN list | grep $CTID)
-    [ "$can_convert" = "" ] && echo "$CTID can *not* be converted to AlmaLinux 8." && exit 1
+    if [ "$can_convert" = "" ]; then 
+        echo "almaconvert8 says $CTID can NOT be converted to AlmaLinux 8..."
+        echo "But: part of the 'almaconvert8 list' command is just looking to see if the template name ends with centos-7-x86_64 or centos-7. Therefore, you can try changing the template name in the CT config file (/vz/private/$CTID/ve.conf) to match that pattern."
+        exit 1
+    fi
     echo "$CTID can be converted to AlmaLinux 8."
-
-    echo "Note: part of the 'almaconvert8 list' command is just looking to see if the template name ends with centos-7-x86_64 or centos-7. If this fails, try changing the template name in the CT config file (/vz/private/$CTID/ve.conf) to match that pattern."
+    echo "----------------------------------------------"
 
     netfilter=$(grep "NETFILTER" /vz/private/$CTID/ve.conf)
     if [[ -z "$netfilter" ]]; then # empty
