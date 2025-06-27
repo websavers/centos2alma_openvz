@@ -18,6 +18,8 @@ If issues are encountered with PHP handlers in the --finish stage, it can suprem
 - OpenVZ 7.0.22
 - Plesk 17.0.60
 - Plesk 17.0.65
+- Plesk 18.0.69
+- Plesk 18.0.70
 - CentOS 7.9 stock
 - CentOS 7.9 with Tuxcare Repos (Nov 2024, version 1.7) 
 
