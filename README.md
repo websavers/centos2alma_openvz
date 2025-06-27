@@ -30,10 +30,16 @@ Any version of OpenVZ or Virtuozzo older than what's noted above is not likely t
 # Usage
 
 Check to be sure the container is recognized as convertible by almaconvert8:
-`./centos2alma_openvz.sh $CTID --check`
+
+```
+./centos2alma_openvz.sh $CTID --check
+```
 
 If all is well, begin conversion:
-`./centos2alma_openvz.sh $CTID`
+
+```
+./centos2alma_openvz.sh $CTID
+```
 
 During the run of almaconvert8 you will probably see the following warnings. Ones about Plesk repos can be safely ignored:
 > Warning! Unsupported repositories detected
