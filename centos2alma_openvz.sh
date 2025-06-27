@@ -241,9 +241,9 @@ function ct_convert {
             vzctl exec $CTID 'rm -f /etc/yum.repos.d/centos7-els*'
             vzctl exec $CTID 'rm -f /etc/yum.repos.d/plesk-migrator.repo'
 
-            vzctl exec $CTID yum -y update
+            vzctl exec $CTID yum -y update --skip-broken
             # Swap all vl8 packages for al8 packages
-            vzctl exec $CTID yum -y distro-sync --disablerepo=epel
+            vzctl exec $CTID yum -y distro-sync --disablerepo=epel --skip-broken
             if [ ! $? -eq 0 ]; then
                 echo "Manual conversion from vzlinux8 to almalinux8 failed during distro-sync. See readme for assistance." && exit 1
             fi
