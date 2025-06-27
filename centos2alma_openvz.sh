@@ -230,9 +230,12 @@ function ct_convert {
             vzctl exec $CTID rpm -e vzlinux-release --nodeps
             vzctl exec $CTID rpm -Uvh http://mirror.its.dal.ca/almalinux/8.10/BaseOS/x86_64/os/Packages/almalinux-release-8.10-1.el8.x86_64.rpm
 
-            echo "Disable Plesk repo (it will be recreated in the next phase) and update extension repos"
+            echo "Disable Plesk repo (it will be recreated in the next phase) and update Plesk extension repos"
             vzctl exec $CTID mv /etc/yum.repos.d/plesk.repo /etc/yum.repos.d/plesk.repo.old
             vzctl exec $CTID sed -i -e 's/CentOS-7/RedHat-el8/g' /etc/yum.repos.d/plesk-*.repo
+
+            echo "Disable mariadb repo in case it's v10.4 or earlier (which don't exist anymore)"
+            vzctl exec $CTID mv /etc/yum.repos.d/mariadb.repo /etc/yum.repos.d/mariadb.repo.old
 
             echo "Removing TuxCare and Plesk Migrator Repos (if utilized)"
             vzctl exec $CTID 'rm -f /etc/yum.repos.d/centos7-els*'
