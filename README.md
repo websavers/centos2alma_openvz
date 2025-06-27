@@ -44,11 +44,11 @@ If all is well, begin conversion:
 During the run of almaconvert8 you will probably see the following warnings. Ones about Plesk repos can be safely ignored:
 > Warning! Unsupported repositories detected
 
-The --convert stage using almaconvert8 can appear to hang for several minutes at a time. This is normal in all cases we've encountered.
+The --convert stage using almaconvert8 *can appear to hang for several minutes at a time*. In particular after adjusting some packages it will say "Complete!" and look like it's doing nothing. Do not interrupt it. This is normal and will proceed typically after about 3-5 minutes, possibly longer.
 
 Logs from almaconvert8 will be stored in /root/almaconvert8-$CTID.log
 
-The process takes approximately 35 minutes on a server with just 1 domain. Perhaps an additional 10 minutes when many domains.
+The process takes approximately 35-60 minutes, mostly depending on a the number of sites hosted.
 
 ## After Conversion
 
