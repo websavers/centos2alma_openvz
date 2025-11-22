@@ -194,6 +194,9 @@ function ct_prepare {
     vzctl exec $CTID rpm -e file-devel --nodeps
     vzctl exec $CTID rpm -e libgs-devel --nodeps
     vzctl exec $CTID rpm -e docker-ce docker-ce-rootless-extras
+    vzctl exec $CTID rpm -e libbrotli --nodeps
+    # Imunify360 dependencies:
+    vzctl exec $CTID yum -y remove alt-python35 alt-python35-libs
 
     # Convert fails when there's a broken symlink to templates, so remove it ahead of time
     TEMPLATES_PATH=/vz/private/$CTID/templates
@@ -247,6 +250,11 @@ function ct_convert {
             vzctl exec $CTID rpm -e alt-libheif-1.20.2-1.el7.x86_64
             vzctl exec $CTID rpm -e x265-libs-1.9-1.el7.x86_64
             vzctl exec $CTID rpm -e lua-devel-5.3.4-12.vl8.x86_64
+
+            vzctl exec $CTID wget http://repo.almalinux.org/almalinux/8/BaseOS/x86_64/os/Packages/brotli-1.0.6-3.el8.x86_64.rpm
+            vzctl exec $CTID rpm -e brotli --nodeps
+            vzctl exec $CTID rpm -ivh brotli-1.0.6-3.el8.x86_64.rpm
+
 
             vzctl exec $CTID yum -y update --skip-broken
             # Swap all vl8 packages for al8 packages
