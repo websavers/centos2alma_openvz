@@ -360,6 +360,9 @@ gpgcheck=1
     # Remi repo conflicts with Plesk reinstall
     vzctl exec $CTID 'yum -y remove libargon2 libgs'
 
+    # Imunify repo conflict
+    vzctl exec $CTID 'yum -y remove alt-python35-libs'
+
     echo "Repairing epel repo..."
     vzctl exec $CTID 'grep "Enterprise Linux 7" /etc/yum.repos.d/epel.repo >/dev/null && mv /etc/yum.repos.d/epel.repo /etc/yum.repos.d/epel.repo.old && mv /etc/yum.repos.d/epel.repo.rpmnew /etc/yum.repos.d/epel.repo'
 
@@ -394,7 +397,7 @@ enabled=1
 gpgcheck=1
 " > /etc/yum.repos.d/plesk-base-tmp.repo'
 
-    vzctl exec2 $CTID 'yum -y install plesk-release plesk-engine plesk-completion psa-autoinstaller psa-libxml-proxy plesk-repair-kit plesk-config-troubleshooter psa-updates psa-phpmyadmin'
+    vzctl exec2 $CTID 'yum -y install plesk-release plesk-engine plesk-completion psa-autoinstaller psa-libxml-proxy plesk-repair-kit psa-updates psa-phpmyadmin'
     [ ! $? -eq 0 ] && echo "Failure with Plesk yum repository - Exiting..." && exit 1
 
     echo "Reinstalling Plesk components..."
