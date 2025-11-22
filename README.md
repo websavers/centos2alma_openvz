@@ -60,6 +60,10 @@ The following sections are actions you might wish to take after conversion.
 
 If you had it enabled prior to conversion, you should re-enable it now: `systemctl restart fail2ban`
 
+### If you use drwebd and it doesn't start
+
+The steps here should resolve it: https://support.plesk.com/hc/en-us/articles/12377321562391-Unable-to-start-Plesk-Premium-Antivirus-Dr-Web-on-Plesk-server
+
 ### Removing snapshots after successful conversion
 
 IMPORTANT: Once you have confirmed the conversion has been successul and you do not need to reset to the CentOS 7 snapshot, run these commands to delete the snapshots created by this process:

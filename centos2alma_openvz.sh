@@ -403,6 +403,9 @@ gpgcheck=1
     vzctl exec2 $CTID 'yum -y install plesk-release plesk-engine plesk-completion psa-autoinstaller psa-libxml-proxy plesk-repair-kit psa-updates psa-phpmyadmin'
     [ ! $? -eq 0 ] && echo "Failure with Plesk yum repository - Exiting..." && exit 1
 
+    # Prepare for drwebd reinstall
+    rm -rf /var/drweb/ /etc/drweb/
+
     echo "Reinstalling Plesk components..."
     vzctl exec $CTID 'plesk installer install-all-updates'
     vzctl exec $CTID 'plesk installer add --components `cat /root/centos2alma/plesk_components | grep -v -E "(config-troubleshooter|php5\.6|php7\.0)"` --debug'
