@@ -404,8 +404,9 @@ gpgcheck=1
     [ ! $? -eq 0 ] && echo "Failure with Plesk yum repository - Exiting..." && exit 1
 
     # Prepare for drwebd reinstall
-    vzctl exec2 $CTID 'yum reinstall glibc'
-    vzctl exec2 $CTID 'rm -rf /var/drweb/ /etc/drweb/'
+    vzctl exec $CTID 'rpm -e glibc32 --nodeps'
+    vzctl exec $CTID 'yum reinstall glibc'
+    vzctl exec $CTID 'rm -rf /var/drweb/ /etc/drweb/'
 
     echo "Reinstalling Plesk components..."
     vzctl exec $CTID 'plesk installer install-all-updates'
