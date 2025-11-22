@@ -240,6 +240,13 @@ function ct_convert {
             echo "Removing TuxCare and Plesk Migrator Repos (if utilized)"
             vzctl exec $CTID 'rm -f /etc/yum.repos.d/centos7-els*'
             vzctl exec $CTID 'rm -f /etc/yum.repos.d/plesk-migrator.repo'
+            
+            echo "Removing potential conflicting packages"
+            vzctl exec $CTID rpm -e libheif-1.3.2-2.el7.x86_64
+            vzctl exec $CTID rpm -e x265-1.9-1.el7.x86_64
+            vzctl exec $CTID rpm -e alt-libheif-1.20.2-1.el7.x86_64
+            vzctl exec $CTID rpm -e x265-libs-1.9-1.el7.x86_64
+            vzctl exec $CTID rpm -e lua-devel-5.3.4-12.vl8.x86_64
 
             vzctl exec $CTID yum -y update --skip-broken
             # Swap all vl8 packages for al8 packages
