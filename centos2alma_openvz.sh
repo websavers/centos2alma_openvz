@@ -405,7 +405,7 @@ gpgcheck=1
 
     # Prepare for drwebd reinstall
     vzctl exec $CTID 'rpm -e glibc32 --nodeps'
-    vzctl exec $CTID 'yum reinstall glibc'
+    vzctl exec $CTID 'yum -y reinstall glibc'
     vzctl exec $CTID 'rm -rf /var/drweb/ /etc/drweb/'
 
     echo "Reinstalling Plesk components..."
