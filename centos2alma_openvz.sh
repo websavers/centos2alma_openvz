@@ -259,9 +259,9 @@ function ct_convert {
             vzctl exec $CTID rpm -ivh brotli-1.0.6-3.el8.x86_64.rpm
 
 
-            vzctl exec $CTID yum -y update --skip-broken
+            #vzctl exec $CTID yum -y update --skip-broken --allowerasing
             # Swap all vl8 packages for al8 packages
-            vzctl exec $CTID yum -y distro-sync --disablerepo=epel --skip-broken
+            vzctl exec $CTID yum -y distro-sync --disablerepo=epel --skip-broken --allowerasing
             if [ ! $? -eq 0 ]; then
                 echo "Manual conversion from vzlinux8 to almalinux8 failed during distro-sync. See readme for assistance." && exit 1
             fi
