@@ -168,6 +168,8 @@ function ct_prepare {
     echo "If installed, disabling art/tortix repo"
     vzctl exec $CTID mv /etc/yum.repos.d/tortix-common.repo /etc/yum.repos.d/tortix-common.disabled
 
+    vzctl exec $CTID yum -y clean all
+
     echo "Removing packages that conflict with the almaconvert8 conversion process, including Plesk RPMs..."
     vzctl exec $CTID rpm -e btrfs-progs --nodeps
     vzctl exec $CTID rpm -e python3-pip --nodeps
