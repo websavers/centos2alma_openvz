@@ -415,7 +415,7 @@ gpgcheck=1
     vzctl exec $CTID 'plesk installer add --components `cat /root/centos2alma/plesk_components | grep -v -E "(troubleshooter|php5\.6|php7\.0)"` --debug'
     vzctl exec $CTID 'plesk installer add --components php8.1 php8.2 php8.3'
 
-    vzctl exec $CTID 'grep -q drweb /root/centos2alma/plesk_components && yum install psa-drweb-configurator'
+    vzctl exec $CTID 'grep -q drweb /root/centos2alma/plesk_components && yum -y install psa-drweb-configurator'
 
     echo "Fixing phpMyAdmin..."
     # https://www.plesk.com/kb/support/plesk-repair-installation-shows-warning-phpmyadmin-was-configured-without-configuration-storage-in-database/
