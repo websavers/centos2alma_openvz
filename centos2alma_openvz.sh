@@ -265,7 +265,7 @@ function ct_convert {
             #vzctl exec $CTID yum -y update --skip-broken --allowerasing
             # Swap all vl8 packages for al8 packages
             # alt-common repo is from Tuxcare
-            vzctl exec $CTID yum -y distro-sync --disablerepo=epel --disablerepo=epel-modular --disablerepo=alt-common --disablerepo=imunify360 --disablerepo=MongoDB --skip-broken --allowerasing
+            vzctl exec $CTID yum -y distro-sync --disablerepo=epel --disablerepo=epel-modular --disablerepo=alt-common --disablerepo=imunify360 --skip-broken --allowerasing
             #if [ ! $? -eq 0 ]; then
             #    echo "Manual conversion from vzlinux8 to almalinux8 failed during distro-sync. See readme for assistance." && exit 1
             #fi
