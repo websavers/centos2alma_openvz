@@ -236,7 +236,8 @@ function ct_convert {
         vzctl exec2 $CTID 'grep -q "Virtuozzo" /etc/redhat-release'
         if [ $? -eq 0 ]; then
             vzctl exec $CTID rpm -e vzlinux-release --nodeps
-            vzctl exec $CTID rpm -Uvh http://mirror.its.dal.ca/almalinux/8.10/BaseOS/x86_64/os/Packages/almalinux-release-8.10-1.el8.x86_64.rpm
+            #vzctl exec $CTID rpm -Uvh http://mirror.its.dal.ca/almalinux/8.10/BaseOS/x86_64/os/Packages/almalinux-release-8.10-1.el8.x86_64.rpm
+            vzctl exec $CTID rpm -Uvh http://repo.almalinux.org/almalinux/8.10/BaseOS/x86_64/os/Packages/almalinux-release-8.10-1.el8.x86_64.rpm
 
             echo "Disable Plesk repo (it will be recreated in the next phase) and update Plesk extension repos"
             vzctl exec $CTID mv /etc/yum.repos.d/plesk.repo /etc/yum.repos.d/plesk.repo.old
@@ -263,10 +264,11 @@ function ct_convert {
 
             #vzctl exec $CTID yum -y update --skip-broken --allowerasing
             # Swap all vl8 packages for al8 packages
-            vzctl exec $CTID yum -y distro-sync --disablerepo=epel --skip-broken --allowerasing
-            if [ ! $? -eq 0 ]; then
-                echo "Manual conversion from vzlinux8 to almalinux8 failed during distro-sync. See readme for assistance." && exit 1
-            fi
+            # alt-common repo is from Tuxcare
+            vzctl exec $CTID yum -y distro-sync --disablerepo=epel --disablerepo=epel-modular --disablerepo=alt-common --disablerepo=imunify360 --disablerepo=MongoDB --skip-broken --allowerasing
+            #if [ ! $? -eq 0 ]; then
+            #    echo "Manual conversion from vzlinux8 to almalinux8 failed during distro-sync. See readme for assistance." && exit 1
+            #fi
 
             vzctl exec2 $CTID 'grep -q "AlmaLinux release" /etc/redhat-release'
             if [ ! $? -eq 0 ]; then
