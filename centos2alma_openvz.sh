@@ -308,6 +308,7 @@ name=PLESK_$PLESK_VER_USCORES extras
 baseurl=http://autoinstall.plesk.com/PSA_$PLESK_VER/extras-rpm-RedHat-el8-x86_64/
 enabled=1
 gpgcheck=1
+exclude=mod_security
 
 [PLESK_17_PHP71]
 name=PHP 7.1
